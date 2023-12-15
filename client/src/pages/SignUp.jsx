@@ -3,19 +3,45 @@ import { register } from '../api/auth';
 import WhiteLogo from '../assets/white_transparent.png';
 import LoginFormButton from '../components/buttons/LoginFormButton';
 import { useNavigate } from 'react-router-dom';
+import { validateEmail } from '../utils/formHandlers';
 
 export default function SignUp() {
+    const PASSWORD_LENGTH = 8;
+    const USERNAME_LENGTH = 3;
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [username, setUsername] = useState('');
 
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
         setIsLoading(true);
+        let error = false;
+
+        if (!validateEmail(email)) {
+            setError((prev) => ({ ...prev, email: 'Please enter a valid email address' }));
+            setIsLoading(false);
+            error = true;
+        }
+
+        if (password.length < PASSWORD_LENGTH) {
+            setError((prev) => ({ ...prev, password: 'Password must be at least 8 characters long' }));
+            setIsLoading(false);
+            error = true;
+        }
+
+        if (username.length < USERNAME_LENGTH) {
+            setError((prev) => ({ ...prev, username: 'Username must be at least 3 characters long' }));
+            setIsLoading(false);
+            error = true;
+        }
+
+        if (error) return null;
 
         const formData = {
             email: email,
@@ -61,8 +87,13 @@ export default function SignUp() {
                                     onChange={(e) => setEmail(e.target.value)}
                                 />
                             </div>
+                            {error?.email ? (
+                                <p className='mt-1 text-sm text-red-500 h-4'>{error?.email}</p>
+                            ) : (
+                                <p className='mt-1 text-sm text-transparent h-4'></p>
+                            )}
                         </div>
-                        <div>
+                        <div className='-mt-3'>
                             <label htmlFor='username' className='block text-sm font-medium leading-6 text-white'>
                                 User Name
                             </label>
@@ -73,22 +104,22 @@ export default function SignUp() {
                                     type='username'
                                     autoComplete='username'
                                     required
-                                    className='block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-teal-500 sm:text-sm sm:leading-6'
+                                    className='px-3 block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-teal-500 sm:text-sm sm:leading-6'
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
                                 />
                             </div>
+                            {error?.username ? (
+                                <p className='mt-1 text-sm text-red-500 h-4'>{error?.username}</p>
+                            ) : (
+                                <p className='mt-1 text-sm text-transparent h-4'></p>
+                            )}
                         </div>
                         <div>
                             <div className='flex items-center justify-between'>
                                 <label htmlFor='password' className='block text-sm font-medium leading-6 text-white'>
                                     Password
                                 </label>
-                                {/* <div className='text-sm'>
-                                    <a href='#' className='font-semibold text-teal-400 hover:text-teal-300'>
-                                        Forgot password?
-                                    </a>
-                                </div> */}
                             </div>
                             <div className='mt-2'>
                                 <input
@@ -102,6 +133,11 @@ export default function SignUp() {
                                     onChange={(e) => setPassword(e.target.value)}
                                 />
                             </div>
+                            {error?.password ? (
+                                <p className='mt-1 text-sm text-red-500 h-4'>{error?.password}</p>
+                            ) : (
+                                <p className='mt-1 text-sm text-transparent h-4'></p>
+                            )}
                         </div>
 
                         <div>

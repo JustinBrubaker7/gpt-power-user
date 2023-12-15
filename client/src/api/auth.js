@@ -10,6 +10,7 @@ export async function login(formData) {
             body: JSON.stringify({ email: formData.email, password: formData.password }),
         });
 
+        console.log(response, 'response');
         if (response.ok) {
             console.log(response, 'response');
             const data = await response.json();

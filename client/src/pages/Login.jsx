@@ -4,21 +4,27 @@ import { useAuth } from '../context/auth-context';
 import { useNavigate } from 'react-router-dom';
 import WhiteLogo from '../assets/white_transparent.png';
 import LoginFormButton from '../components/buttons/LoginFormButton';
+import { validateEmail } from '../utils/formHandlers';
 
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     const { loginUserIn } = useAuth();
     const navigate = useNavigate();
 
-    // const history = useNavigate();
-
     const handleLogin = async (e) => {
         e.preventDefault();
         setIsLoading(true);
+
+        if (!validateEmail(email)) {
+            setError((prev) => ({ ...prev, email: 'Please enter a valid email address' }));
+            setIsLoading(false);
+            return;
+        }
 
         const formData = {
             email: email,
@@ -28,10 +34,15 @@ export default function Login() {
 
         try {
             let successfulLogin = await login(formData);
-            if (successfulLogin) {
-                loginUserIn(successfulLogin);
-                navigate('/');
+            console.log(successfulLogin);
+            if (successfulLogin.error) {
+                setError((prev) => ({ ...prev, login: successfulLogin.error }));
+                setIsLoading(false);
+                return;
             }
+
+            loginUserIn(successfulLogin);
+            navigate('/');
 
             console.log(successfulLogin);
         } catch (error) {
@@ -63,15 +74,22 @@ export default function Login() {
                                     type='email'
                                     autoComplete='email'
                                     required
+                                    onBlur={() => setError(null)}
+                                    onInput={() => setError(null)}
                                     className='block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-teal-500 sm:text-sm sm:leading-6'
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                 />
                             </div>
+                            {error?.email ? (
+                                <p className='mt-1 text-sm text-red-500 h-4'>{error?.email}</p>
+                            ) : (
+                                <p className='mt-1 text-sm text-transparent h-4'></p>
+                            )}
                         </div>
 
                         <div>
-                            <div className='flex items-center justify-between'>
+                            <div className='flex items-center justify-between -mt-3'>
                                 <label htmlFor='password' className='block text-sm font-medium leading-6 text-white'>
                                     Password
                                 </label>
@@ -88,13 +106,14 @@ export default function Login() {
                                     type='password'
                                     autoComplete='current-password'
                                     required
+                                    onBlur={() => setError(null)}
                                     className='block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-teal-500 sm:text-sm sm:leading-6'
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                 />
                             </div>
                         </div>
-
+                        <div>{error?.login && <p className='mt-1 text-sm text-red-500 h-4'>{error?.login}</p>}</div>
                         <div>
                             <LoginFormButton displayText={'Login'} handler={handleLogin} isLoading={isLoading} />
                         </div>
