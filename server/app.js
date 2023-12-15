@@ -4,14 +4,14 @@ const cors = require('cors');
 const morgan = require('morgan');
 const app = express();
 const path = require('path');
+const verifyToken = require('./middleware/authMiddleware');
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
 app.use(morgan('dev'));
-const verifyToken = require('./middleware/authMiddleware');
 
-require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+require('dotenv').config({ path: path.resolve(__dirname, './.env') });
 
 console.log(process.env.JWT_SECRET);
 

@@ -19,7 +19,6 @@ module.exports = (sequelize, DataTypes) => {
         username: {
             type: DataTypes.STRING,
             allowNull: false,
-            unique: true,
         },
         // Securely hashed password for authentication
         password: {
