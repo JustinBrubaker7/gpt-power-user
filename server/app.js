@@ -2,10 +2,13 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const morgan = require('morgan');
-const app = express();
+const http = require('http');
 const path = require('path');
-const verifyToken = require('./middleware/authMiddleware');
+const WebSocket = require('ws');
+const { verifyToken, verifyTokenSync } = require('./middleware/authMiddleware');
 
+const app = express();
+const server = http.createServer(app);
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
@@ -29,6 +32,34 @@ app.use('/auth', authRoutes);
 app.get('/hello', (req, res) => {
     res.send('Hello World!');
 });
+
+const { completeChatStream } = require('./controllers/openaiController');
+const wss = new WebSocket.Server({ port: 8080 });
+
+wss.on('connection', function connection(ws, req) {
+    // Extract token from the request
+    const token = req.url.split('userId=')[1]; // Adjust this based on how the token is sent
+
+    // Verify the token
+    try {
+        const decoded = verifyTokenSync(token);
+        // Token is valid, you can add user info to the WebSocket object if needed
+        ws.user = decoded.user;
+
+        ws.on('message', function incoming(message) {
+            console.log('received: %s', message);
+            completeChatStream({ ws, message, WebSocket });
+        });
+
+        ws.on('close', () => console.log('Client has disconnected'));
+    } catch (error) {
+        // Token is invalid, close the connection
+        console.log('Invalid token, closing connection');
+        ws.close();
+    }
+});
+
+console.log('WebSocket server started on ws://localhost:8080');
 
 // Server Listening
 const PORT = process.env.PORT || 3000;

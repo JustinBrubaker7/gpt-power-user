@@ -8,3 +8,28 @@ body {
     height: 100vh;
     background-color: #1a202c;
 }
+
+/* Styling for the scrollbar itself */
+::-webkit-scrollbar {
+    width: 7px; /* Thin scrollbar width */
+    height: 5px; /* For horizontal scrollbars */
+}
+
+/* Styling for the track (the part the thumb moves along) */
+::-webkit-scrollbar-track {
+    background-color: #1a202c; /* Dark gray track for contrast against the black background */
+    border-radius: 10px; /* Rounded corners for the track */
+}
+
+/* Styling for the thumb (the draggable part) */
+::-webkit-scrollbar-thumb {
+    background-color: #c1c1c1; /* Light gray thumb for visibility on dark background */
+    border-radius: 10px; /* Rounded corners for the thumb */
+    border: 2px solid transparent; /* Prevents the thumb from being too wide */
+    background-clip: content-box; /* Ensures the border doesn't take up extra space */
+}
+
+/* Styling for the thumb when hovering or active */
+::-webkit-scrollbar-thumb:hover {
+    background-color: #a8a8a8; /* Slightly darker on hover for interactive feedback */
+}

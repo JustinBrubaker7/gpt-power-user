@@ -26,6 +26,12 @@ export default function Login() {
             return;
         }
 
+        if (password.length < 6) {
+            setError((prev) => ({ ...prev, password: 'Password must be at least 6 characters long' }));
+            setIsLoading(false);
+            return;
+        }
+
         const formData = {
             email: email,
             password: password,
@@ -41,7 +47,7 @@ export default function Login() {
                 return;
             }
 
-            loginUserIn(successfulLogin);
+            loginUserIn(successfulLogin.data);
             navigate('/');
 
             console.log(successfulLogin);
@@ -112,6 +118,11 @@ export default function Login() {
                                     onChange={(e) => setPassword(e.target.value)}
                                 />
                             </div>
+                            {error?.password ? (
+                                <p className='mt-1 text-sm text-red-500 h-4'>{error?.password}</p>
+                            ) : (
+                                <p className='mt-1 text-sm text-transparent h-4'></p>
+                            )}
                         </div>
                         <div>{error?.login && <p className='mt-1 text-sm text-red-500 h-4'>{error?.login}</p>}</div>
                         <div>

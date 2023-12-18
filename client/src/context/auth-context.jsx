@@ -34,8 +34,11 @@ export const AuthContextProvider = (props) => {
     }
 
     function updateUserLocalStorage(data) {
-        localStorage.setItem('Id', data.Id);
-        localStorage.setItem('Email', data.Email);
+        console.log(data);
+        localStorage.setItem('userId', data.userId);
+        localStorage.setItem('username', data.username);
+        localStorage.setItem('email', data.email);
+        localStorage.setItem('token', data.token);
     }
 
     function loginUserIn(data) {
@@ -67,14 +70,18 @@ export const AuthContextProvider = (props) => {
     useEffect(() => {
         setLoading(true);
 
-        const storedId = localStorage.getItem('Id');
-        const storedEmail = localStorage.getItem('Email');
+        const storedId = localStorage.getItem('userId');
+        const storedEmail = localStorage.getItem('email');
+        const storedUsername = localStorage.getItem('username');
+        const storedToken = localStorage.getItem('token');
 
         const now = new Date();
         if (storedId) {
             setCurrentUser({
-                Id: storedId,
-                Email: storedEmail,
+                userId: storedId,
+                email: storedEmail,
+                username: storedUsername,
+                token: storedToken,
             });
         }
         setLoading(false);

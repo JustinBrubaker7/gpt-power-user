@@ -17,4 +17,17 @@ const verifyToken = (req, res, next) => {
     return next();
 };
 
-module.exports = verifyToken;
+const verifyTokenSync = (token) => {
+    if (!token) {
+        throw new Error('A token is required for authentication');
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        return decoded;
+    } catch (err) {
+        throw new Error('Invalid Token');
+    }
+};
+
+module.exports = { verifyToken, verifyTokenSync };
