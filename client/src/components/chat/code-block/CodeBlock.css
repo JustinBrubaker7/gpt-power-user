@@ -1,10 +1,7 @@
 .code-block {
     background-color: #333; /* Dark background */
-    color: #fff; /* Light text */
     padding: 10px;
-    border-radius: 5px;
+    border-radius: 0 0 5px 5px;
     overflow-x: auto; /* For horizontal scrolling */
     font-family: 'Source Code Pro', monospace; /* Use a monospaced font */
 }
-
-/* Add more styling as needed, possibly syntax highlighting */

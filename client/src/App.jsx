@@ -20,10 +20,10 @@ function App() {
                     }
                 />
                 <Route
-                    path='/test'
+                    path='/chat/:chatId'
                     element={
                         <PrivateRoute>
-                            <p> Hello World </p>
+                            <HomePage />
                         </PrivateRoute>
                     }
                 />

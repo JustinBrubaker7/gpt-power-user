@@ -4,14 +4,31 @@
         <meta charset="UTF-8" />
         <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <!-- Highlight.js Styles -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" />
+
         <title>PowerGPT</title>
         <meta
             name="description"
-            content="PowerGPT is a GPT-4 pwoer user interface full featured for the user that wants to get the most out of GPT-4."
+            content="PowerGPT is a GPT-4 power user interface full featured for the user that wants to get the most out of GPT-4."
         />
     </head>
     <body>
         <div id="root"></div>
+
+        <!-- Highlight.js Script -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+        <!-- Additional Language, if needed -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/go.min.js"></script>
+
+        <!-- Initialize Highlight.js -->
+        <script>
+            document.addEventListener('DOMContentLoaded', (event) => {
+                hljs.highlightAll();
+            });
+        </script>
+
         <script type="module" src="/src/main.jsx"></script>
     </body>
 </html>

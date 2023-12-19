@@ -18,6 +18,7 @@ const db = {
     sequelize: sequelize,
     Sequelize: Sequelize,
     User: require('./user')(sequelize, Sequelize.DataTypes),
+    Chat: require('./chat')(sequelize, Sequelize.DataTypes),
 };
 
 db.sequelize

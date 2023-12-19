@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import SidebarShell from '../../layout/SidebarShell.jsx';
 import { useAuth } from '../../context/auth-context.jsx';
-import { establishWebSocketConnection } from '../../api/chat.js';
+import { useLocation } from 'react-router-dom';
+import { establishWebSocketConnection, fetchChatById } from '../../api/chat.js';
+import CodeBlock from './code-block/CodeBlock.jsx';
 
 const models = [
     {
@@ -21,13 +23,47 @@ const Main = () => {
     const endOfMessagesRef = useRef(null);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
+    const [chatId, setChatId] = useState(null);
+    const [isLoading, setIsLoading] = useState(true); // Added
     const [selectedModel, setSelectedModel] = useState('gpt-3.5-turbo-1106');
+    const [settings, setSettings] = useState({
+        model: selectedModel,
+        temperature: 0.7, // Hardcoded temperature
+        conversationType: messages.length ? 'continue' : 'new',
+        userId: currentUser.userId,
+    });
+
+    const location = useLocation();
+
+    useEffect(() => {
+        // see if the windoe is /chat/:chatId
+        const chatIdFromUrl = window.location.pathname.split('/').pop();
+
+        console.log('chatIdFromUrl', chatIdFromUrl);
+
+        if (chatIdFromUrl) {
+            fetchChatById(chatIdFromUrl, currentUser).then((chat) => {
+                console.log('chat', chat);
+                setChatId(chatIdFromUrl);
+                setMessages(JSON.parse(chat.messages));
+                console.log('chat.messages', JSON.parse(chat.messages));
+                setSelectedModel(chat.model);
+                setIsLoading(false);
+            });
+
+            console.log('chatIdFromUrl', chatIdFromUrl);
+        } else {
+            setIsLoading(false);
+            setChatId(null);
+            setMessages([]);
+        }
+    }, [location]);
 
     const scrollToBottom = () => {
         endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
-    establishWebSocketConnection(ws, currentUser, newMessage, setMessages, selectedModel);
+    establishWebSocketConnection(ws, currentUser, newMessage, setMessages, selectedModel, setSettings);
 
     useEffect(() => {
         scrollToBottom();
@@ -42,6 +78,9 @@ const Main = () => {
             settings: {
                 model: selectedModel,
                 temperature: 0.7, // Hardcoded temperature
+                conversationType: messages.length ? 'continue' : 'new',
+                userId: currentUser.userId,
+                id: settings.id,
             },
             messages: [...messages, { content: newMessage, role: 'user' }],
         };
@@ -60,9 +99,17 @@ const Main = () => {
     const handleKeyDown = (event) => {
         if (event.keyCode === 13) {
             // Check if the Enter key is pressed
+            console.log('Enter key pressed');
             handleSendMessage();
         }
     };
+
+    if (isLoading)
+        return (
+            <div className='flex justify-center items-center h-screen '>
+                <h1 className='text-white text-3xl'>Loading...</h1>
+            </div>
+        );
 
     return (
         <SidebarShell>
@@ -72,7 +119,7 @@ const Main = () => {
                 models={models}
                 disabled={messages.length}
             />
-            <div className='flex flex-col h-3/4 fixed bottom-10 w-2/3'>
+            <div className='flex flex-col h-3/4 fixed bottom-10 w-5/6'>
                 <MessageList
                     messages={messages}
                     endOfMessagesRef={endOfMessagesRef}
@@ -91,7 +138,7 @@ const Main = () => {
 
 const Header = ({ selectedModel, setSelectedModel, models, disabled }) => {
     return (
-        <div className='flex text-white justify-between items-center border-b-2 border-gray-300 p-2 '>
+        <div className='flex text-white justify-between items-center border-b-2 border-gray-300  '>
             <h1 className='text-2xl text-white font-bold'>Chat</h1>
             <div className='flex items-center'>
                 <select
@@ -113,7 +160,7 @@ const Header = ({ selectedModel, setSelectedModel, models, disabled }) => {
 
 const MessageList = ({ messages, endOfMessagesRef, modelName }) => {
     return (
-        <div className='flex-grow overflow-y-auto mb-2 p-2'>
+        <div className='flex-grow overflow-y-auto mb-2 p-2 mx-auto w-5/6'>
             {messages.map((message, index) => (
                 <div
                     key={index}
@@ -122,7 +169,7 @@ const MessageList = ({ messages, endOfMessagesRef, modelName }) => {
                     <div className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'}`}>
                         <div className={`flex flex-col p-2 min-w-36 rounded-lg `}>
                             <span
-                                className={`text-xs text-gray-500  ${message.role === 'user' ? 'text-right' : 'text-left'}`}
+                                className={`text-xs text-gray-500  ${message.role === 'user' ? 'text-left' : 'text-left'}`}
                             >
                                 <span className='inline-block h-6 w-6 overflow-hidden rounded-full bg-gray-100'>
                                     <svg className='h-full w-full text-gray-300' fill='currentColor' viewBox='0 0 24 24'>
@@ -142,19 +189,45 @@ const MessageList = ({ messages, endOfMessagesRef, modelName }) => {
 };
 
 const MessageInput = ({ newMessage, setNewMessage, handleSendMessage, handleKeyDown }) => {
+    const [rows, setRows] = useState(1);
+
+    const handleChange = (e) => {
+        setNewMessage(e.target.value);
+        updateRows(e.target.value);
+    };
+
+    const updateRows = (text) => {
+        const newLines = text.split('\n').length;
+        setRows(Math.min(Math.max(newLines, 1), 10)); // Limits between 2 and 10 rows
+    };
+
+    const onSendMessage = () => {
+        handleSendMessage(); // Call the provided sendMessage function
+        setRows(1); // Reset rows to initial size
+    };
+
     return (
-        <div className='flex'>
+        <div className='flex items-end'>
             <textarea
                 type='text'
                 placeholder='Type your message...'
                 value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                onKeyDown={handleKeyDown}
-                className='flex-grow mr-2 border border-gray-300 p-2'
+                onChange={handleChange}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        onSendMessage();
+                    } else {
+                        handleKeyDown(e);
+                    }
+                }}
+                rows={rows}
+                className='flex-grow mr-2 border border-gray-300 p-2 min-w-36 rounded-lg outline-none resize-none'
             ></textarea>
             <button
-                onClick={handleSendMessage}
+                onClick={onSendMessage}
                 className='bg-yellow-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
+                style={{ height: 'fit-content' }}
             >
                 Send
             </button>
@@ -163,12 +236,32 @@ const MessageInput = ({ newMessage, setNewMessage, handleSendMessage, handleKeyD
 };
 
 const formatMessage = (message) => {
-    return message.split('\n').map((line, index, array) => (
-        <React.Fragment key={index}>
-            {line}
-            {index !== array.length - 1 && <br />}
-        </React.Fragment>
-    ));
+    const codeBlockRegex = /```(.*?)```/gs;
+    let formattedMessage = [];
+    let lastIndex = 0;
+
+    message.split(codeBlockRegex).forEach((part, index) => {
+        if (index % 2 === 0) {
+            // Regular text
+            formattedMessage.push(
+                <React.Fragment key={index}>
+                    {part.split('\n').map((line, lineIndex) => (
+                        <React.Fragment key={lineIndex}>
+                            {line}
+                            <br />
+                        </React.Fragment>
+                    ))}
+                </React.Fragment>
+            );
+        } else {
+            // Code block
+            formattedMessage.push(<CodeBlock key={index} code={part} />);
+        }
+
+        lastIndex = index;
+    });
+
+    return <>{formattedMessage}</>;
 };
 
 export default Main;
