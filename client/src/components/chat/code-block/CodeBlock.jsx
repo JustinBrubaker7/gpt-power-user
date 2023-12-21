@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ClipboardDocumentCheckIcon } from '@heroicons/react/24/outline';
 import './CodeBlock.css'; // Import your custom CSS
 import Highlight from 'react-highlight';
-import 'highlight.js/styles/dracula.css';
+import 'highlight.js/styles/monokai-sublime.css'; // Import your custom CSS
 
 const CodeBlock = ({ code }) => {
     const [copyFeedback, setCopyFeedback] = useState('');

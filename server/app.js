@@ -6,10 +6,10 @@ const http = require('http');
 const path = require('path');
 const WebSocket = require('ws');
 const cron = require('node-cron');
-// const { nameChats } = require('./controllers/chatController');
 const { verifyToken, verifyTokenSync } = require('./middleware/authMiddleware');
 require('dotenv').config({ path: path.resolve(__dirname, './.env') });
 
+const { nameChats } = require('./controllers/chatController');
 const app = express();
 const server = http.createServer(app);
 // Middleware
@@ -34,7 +34,7 @@ app.get('/hello', (req, res) => {
     res.send('Hello World!');
 });
 
-const { completeChatStream } = require('./controllers/openaiController');
+const { completeChatStream } = require('./controllers/openai/openaiController');
 const wss = new WebSocket.Server({ port: 8080 });
 
 wss.on('connection', function connection(ws, req) {
@@ -61,10 +61,10 @@ wss.on('connection', function connection(ws, req) {
 });
 
 // // Schedule a task to run every minute
-// cron.schedule('* * * * *', () => {
-//     console.log('Running a task every minute');
-//     nameChats(); // Call the function from chatController
-// });
+cron.schedule('* * * * *', () => {
+    console.log('Running a task every minute');
+    nameChats(); // Call the function from chatController
+});
 
 // Server Listening
 const PORT = process.env.PORT || 3000;

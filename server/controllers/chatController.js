@@ -1,5 +1,6 @@
 const { Chat } = require('../models/index');
-const { getChatTitleSummary } = require('./openaiController');
+const { getChatTitleSummary } = require('./openai/openaiUtils');
+const { Op } = require('sequelize');
 
 const addChat = async (chatData, settings) => {
     try {
@@ -7,7 +8,7 @@ const addChat = async (chatData, settings) => {
             const message = await Chat.create({
                 userId: settings.userId,
                 model: settings.model, // Ensure this is provided in settings
-                messages: chatData,
+                messages: JSON.stringify(chatData),
                 title: chatData.title, // Optional, ensure it's provided if needed
             });
             return { message: message, id: message.id };
@@ -41,6 +42,12 @@ const getAllChats = async (req, res) => {
                 userId: req.query.userId,
             },
         });
+
+        // order chats by date
+        chats.sort((a, b) => {
+            return new Date(b.createdAt) - new Date(a.createdAt);
+        });
+
         res.status(200).json({ chats });
     } catch (error) {
         console.error(error);
@@ -67,11 +74,13 @@ const nameChats = async () => {
     try {
         const chats = await Chat.findAll({
             where: {
-                title: null || '',
+                title: {
+                    [Op.or]: [null, ''],
+                },
             },
         });
 
-        if (!chats) {
+        if (!chats.length) {
             return;
         }
         for (const chat of chats) {
@@ -95,5 +104,3 @@ const nameChats = async () => {
 };
 
 module.exports = { addChat, getAllChats, getOneChat, nameChats };
-
-nameChats();

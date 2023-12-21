@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import SidebarShell from '../../layout/SidebarShell.jsx';
 import { useAuth } from '../../context/auth-context.jsx';
 import { useLocation } from 'react-router-dom';
@@ -69,7 +69,12 @@ const Main = () => {
         scrollToBottom();
     }, [messages]);
 
-    const handleSendMessage = () => {
+    useEffect(() => {
+        // Only establish the connection when the component mounts
+        establishWebSocketConnection(ws, currentUser, newMessage, setMessages, selectedModel, setSettings);
+    }, []); // Empty dependency array to run only once
+
+    const handleSendMessage = useCallback(() => {
         if (!newMessage.trim()) return;
 
         let newMessages = [...messages, { content: newMessage, role: 'user' }];
@@ -94,13 +99,16 @@ const Main = () => {
 
         setMessages(newMessages);
         setNewMessage('');
-    };
+    }, [newMessage, messages, ws.current, selectedModel, currentUser.userId]); // Dependencies
 
     const handleKeyDown = (event) => {
-        if (event.keyCode === 13) {
-            // Check if the Enter key is pressed
-            console.log('Enter key pressed');
+        if (event.keyCode === 13 && !event.shiftKey) {
+            // Check if the Enter key is pressed without the Shift key
+            console.log('Enter key pressed without Shift');
             handleSendMessage();
+        } else if (event.keyCode === 13 && event.shiftKey) {
+            // If Shift is also held down, do not submit
+            console.log('Enter key pressed with Shift, not submitting');
         }
     };
 
@@ -158,7 +166,7 @@ const Header = ({ selectedModel, setSelectedModel, models, disabled }) => {
     );
 };
 
-const MessageList = ({ messages, endOfMessagesRef, modelName }) => {
+const MessageList = React.memo(({ messages, endOfMessagesRef, modelName }) => {
     return (
         <div className='flex-grow overflow-y-auto mb-2 p-2 mx-auto w-5/6'>
             {messages.map((message, index) => (
@@ -186,7 +194,7 @@ const MessageList = ({ messages, endOfMessagesRef, modelName }) => {
             <div ref={endOfMessagesRef} />
         </div>
     );
-};
+});
 
 const MessageInput = ({ newMessage, setNewMessage, handleSendMessage, handleKeyDown }) => {
     const [rows, setRows] = useState(1);
