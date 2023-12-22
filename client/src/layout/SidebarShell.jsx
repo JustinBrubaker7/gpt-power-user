@@ -4,17 +4,18 @@ import { useAuth } from '../context/auth-context.jsx';
 import { getAllChats } from '../api/chat.js';
 import BlackLogo from '../assets/black_transparent.png';
 import { Link } from 'react-router-dom';
-import { Bars3Icon, BellIcon, Cog6ToothIcon, HomeIcon, XMarkIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
+import AdvancedOptions from '../components/chat/AdvancedOptions.jsx';
+import SlideOut from './SlideOut.jsx';
+import {
+    Bars3Icon,
+    AdjustmentsVerticalIcon,
+    Cog6ToothIcon,
+    HomeIcon,
+    XMarkIcon,
+    PencilSquareIcon,
+} from '@heroicons/react/24/outline';
 import { ChevronDownIcon, MagnifyingGlassIcon, PlusIcon } from '@heroicons/react/20/solid';
 
-// const navigation = [
-//     { name: 'Dashboard', href: '#', icon: HomeIcon, current: true },
-//     { name: 'Team', href: '#', icon: UsersIcon, current: false },
-//     { name: 'Projects', href: '#', icon: FolderIcon, current: false },
-//     { name: 'Calendar', href: '#', icon: CalendarIcon, current: false },
-//     { name: 'Documents', href: '#', icon: DocumentDuplicateIcon, current: false },
-//     { name: 'Reports', href: '#', icon: ChartPieIcon, current: false },
-// ];
 const teams = [
     { id: 1, name: 'Heroicons', href: '#', initial: 'H', current: false },
     { id: 2, name: 'Tailwind Labs', href: '#', initial: 'T', current: false },
@@ -31,6 +32,7 @@ function classNames(...classes) {
 
 export default function SidebarShell({ children }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [slideOutOpen, setSlideOutOpen] = useState(false);
     const { currentUser, logout } = useAuth();
     const [navigation, setNavigation] = useState();
     const [loading, setLoading] = useState(true);
@@ -207,6 +209,36 @@ export default function SidebarShell({ children }) {
                         <nav className='flex flex-1 -mt-3 flex-col'>
                             <ul role='list' className='flex flex-1 flex-col gap-y-7'>
                                 <li>
+                                    <div className='text-xs font-semibold leading-6 text-gray-400'>Pinned Chats</div>
+                                    <ul role='list' className='-mx-2 mt-2 space-y-1'>
+                                        {teams.map((team) => (
+                                            <li key={team.name}>
+                                                <a
+                                                    href={team.href}
+                                                    className={classNames(
+                                                        team.current
+                                                            ? 'bg-gray-50 text-indigo-600'
+                                                            : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50',
+                                                        'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
+                                                    )}
+                                                >
+                                                    <span
+                                                        className={classNames(
+                                                            team.current
+                                                                ? 'text-indigo-600 border-indigo-600'
+                                                                : 'text-gray-400 border-gray-200 group-hover:border-indigo-600 group-hover:text-indigo-600',
+                                                            'flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border text-[0.625rem] font-medium bg-white'
+                                                        )}
+                                                    >
+                                                        {team.initial}
+                                                    </span>
+                                                    <span className='truncate'>{team.name}</span>
+                                                </a>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </li>
+                                <li>
                                     <ul role='list' className='-mx-2 space-y-1'>
                                         {navigation &&
                                             navigation.map((item, index) => (
@@ -238,36 +270,7 @@ export default function SidebarShell({ children }) {
                                             ))}
                                     </ul>
                                 </li>
-                                <li>
-                                    <div className='text-xs font-semibold leading-6 text-gray-400'>Your teams</div>
-                                    <ul role='list' className='-mx-2 mt-2 space-y-1'>
-                                        {teams.map((team) => (
-                                            <li key={team.name}>
-                                                <a
-                                                    href={team.href}
-                                                    className={classNames(
-                                                        team.current
-                                                            ? 'bg-gray-50 text-indigo-600'
-                                                            : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50',
-                                                        'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
-                                                    )}
-                                                >
-                                                    <span
-                                                        className={classNames(
-                                                            team.current
-                                                                ? 'text-indigo-600 border-indigo-600'
-                                                                : 'text-gray-400 border-gray-200 group-hover:border-indigo-600 group-hover:text-indigo-600',
-                                                            'flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border text-[0.625rem] font-medium bg-white'
-                                                        )}
-                                                    >
-                                                        {team.initial}
-                                                    </span>
-                                                    <span className='truncate'>{team.name}</span>
-                                                </a>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </li>
+
                                 <li className='mt-auto'>
                                     <a
                                         href='#'
@@ -320,7 +323,13 @@ export default function SidebarShell({ children }) {
                                 <div className='flex items-center gap-x-4 lg:gap-x-6'>
                                     <button type='button' className='-m-2.5 p-2.5 text-gray-400 hover:text-gray-500'>
                                         <span className='sr-only'>View notifications</span>
-                                        <BellIcon className='h-6 w-6' aria-hidden='true' />
+                                        <AdjustmentsVerticalIcon
+                                            onClick={() => {
+                                                setSlideOutOpen(true);
+                                            }}
+                                            className='h-7 w-7'
+                                            aria-hidden='true'
+                                        />
                                     </button>
 
                                     {/* Separator */}
@@ -330,14 +339,14 @@ export default function SidebarShell({ children }) {
                                     <Menu as='div' className='relative'>
                                         <Menu.Button className='-m-1.5 flex items-center p-1.5'>
                                             <span className='sr-only'>Open user menu</span>
-                                            <img
+                                            {/* <img
                                                 className='h-8 w-8 rounded-full bg-gray-50'
                                                 src='https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
                                                 alt=''
-                                            />
+                                            /> */}
                                             <span className='hidden lg:flex lg:items-center'>
                                                 <span
-                                                    className='ml-4 text-sm font-semibold leading-6 text-gray-900'
+                                                    className='-ml-1 text-sm font-semibold leading-6 text-gray-900'
                                                     aria-hidden='true'
                                                 >
                                                     {currentUser?.username}
@@ -381,6 +390,9 @@ export default function SidebarShell({ children }) {
                     </div>
 
                     <main className=''>
+                        <SlideOut open={slideOutOpen} setOpen={setSlideOutOpen}>
+                            <AdvancedOptions />
+                        </SlideOut>
                         <div className='px-4 py-2'>{children}</div>
                     </main>
                 </div>
