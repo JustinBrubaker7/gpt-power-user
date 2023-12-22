@@ -35,7 +35,7 @@ app.get('/hello', (req, res) => {
 });
 
 const { completeChatStream } = require('./controllers/openai/openaiController');
-const wss = new WebSocket.Server({ port: 8080 });
+const wss = new WebSocket.Server({ server });
 
 wss.on('connection', function connection(ws, req) {
     // Extract token from the request
@@ -68,6 +68,6 @@ cron.schedule('* * * * *', () => {
 
 // Server Listening
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });

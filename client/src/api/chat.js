@@ -1,7 +1,7 @@
 export const establishWebSocketConnection = (ws, currentUser, newMessage, setMessages, selectedModel, setSettings) => {
     if (!ws.current || ws.current.readyState === WebSocket.CLOSED) {
         console.log('Establishing new WebSocket connection');
-        ws.current = new WebSocket(`ws://localhost:8080${currentUser ? `?userId=${currentUser.token}` : ''}`);
+        ws.current = new WebSocket(`ws://localhost:3000${currentUser ? `?userId=${currentUser.token}` : ''}`);
 
         ws.current.onopen = () => {
             console.log('Connected to the server');
