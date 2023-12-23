@@ -30,8 +30,8 @@ app.use('/chat', verifyToken, chatRoutes);
 // app.use('/openai', openaiRoutes);
 
 // route that says hello
-app.get('/hello', (req, res) => {
-    res.send('Hello World!');
+app.get('/', (req, res) => {
+    res.send('We are live!');
 });
 
 const { completeChatStream } = require('./controllers/openai/openaiController');
