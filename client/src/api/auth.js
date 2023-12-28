@@ -1,8 +1,10 @@
+const HTTP_URL = import.meta.env.VITE_API_URL;
+
 export async function login(formData) {
     console.log(formData, 'login');
 
     try {
-        const response = await fetch('http://localhost:3000/auth/login', {
+        const response = await fetch(`${HTTP_URL}/auth/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -39,7 +41,7 @@ export async function login(formData) {
 
 export async function register(formData) {
     try {
-        const response = await fetch('http://localhost:3000/auth/register', {
+        const response = await fetch(`${HTTP_URL}/auth/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

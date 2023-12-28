@@ -1,7 +1,12 @@
+const HTTP_URL = import.meta.env.VITE_API_URL;
+const WEBSOCKET_URL = import.meta.env.VITE_WEBSOCKET_URL;
+
 export const establishWebSocketConnection = (ws, currentUser, newMessage, setMessages, selectedModel, setSettings) => {
+    console.log(WEBSOCKET_URL);
+
     if (!ws.current || ws.current.readyState === WebSocket.CLOSED) {
         console.log('Establishing new WebSocket connection');
-        ws.current = new WebSocket(`ws://localhost:3000${currentUser ? `?userId=${currentUser.token}` : ''}`);
+        ws.current = new WebSocket(`${WEBSOCKET_URL}/${currentUser ? `?userId=${currentUser.token}` : ''}`);
 
         ws.current.onopen = () => {
             console.log('Connected to the server');
@@ -98,7 +103,7 @@ const createMessageObject = (content, role, modelId) => {
 export const getAllChats = async (user) => {
     try {
         console.log(user.userId);
-        const response = await fetch(`http://localhost:3000/chat/getall?userId=${user.userId}`, {
+        const response = await fetch(`${HTTP_URL}/chat/getall?userId=${user.userId}`, {
             method: 'GET',
             headers: {
                 authorization: `${user.token}`,
@@ -120,7 +125,7 @@ export const getAllChats = async (user) => {
 
 export const fetchChatById = async (chatId, user) => {
     try {
-        const response = await fetch(`http://localhost:3000/chat/getchat?chatId=${chatId}&userId=${user.userId}`, {
+        const response = await fetch(`${HTTP_URL}/chat/getchat?chatId=${chatId}&userId=${user.userId}`, {
             method: 'GET',
             headers: {
                 authorization: `${user.token}`,
