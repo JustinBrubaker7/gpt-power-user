@@ -34,7 +34,7 @@ async function completeChatStream({ ws, message, WebSocket }) {
     }
 
     // Add the updated message to the beginning of the messages array
-    data.messages.pop(newMessage);
+    data.messages.push(newMessage);
 
     // Now that the loop is complete, add chat to the database
     const dataSaved = await addChat(data.messages, data.settings);
