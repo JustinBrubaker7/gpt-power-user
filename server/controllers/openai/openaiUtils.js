@@ -5,6 +5,7 @@ const openai = new OpenAI({
 });
 
 async function getChatTitleSummary(messages) {
+    const MODEL = 'davinci-002'; // Or another suitable model
     // Concatenate all messages into a single string
     const chatContent = messages.map((message) => message.content).join('\n');
 
@@ -13,7 +14,7 @@ async function getChatTitleSummary(messages) {
 
     try {
         const response = await openai.completions.create({
-            model: 'text-davinci-003', // Or another suitable model
+            model: MODEL,
             prompt: prompt,
         });
 
