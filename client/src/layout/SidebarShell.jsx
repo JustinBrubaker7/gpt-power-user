@@ -42,16 +42,10 @@ export default function SidebarShell({ children }) {
             console.log(res.chats);
             setLoading(false);
             const updatedNavigation = [
-                {
-                    name: 'Create a New Chat',
-                    href: '/',
-                    icon: PlusIcon,
-                    current: false,
-                },
                 ...res.chats.map((chat) => ({
                     name: chat.title || 'New Chat', // Fallback to 'Chat' if title is not available
                     href: `/chat/${chat.id}`,
-                    icon: PencilSquareIcon,
+                    icon: null,
                     current: false,
                 })),
             ];
@@ -207,6 +201,22 @@ export default function SidebarShell({ children }) {
                             <h1 className='text-black p-2 font-bold text-2xl'>PowerGPT</h1>
                         </div>
                         <nav className='flex flex-1 -mt-3 flex-col'>
+                            <ul role='list' className='-mx-2 space-y-1 mb-4'>
+                                <li>
+                                    <Link
+                                        to='/'
+                                        className='text-gray-700 hover:text-yellow-500 hover:bg-gray-50 group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
+                                    >
+                                        <PlusIcon
+                                            className='h-6 w-6 shrink-0 text-gray-400 group-hover:text-yellow-500'
+                                            aria-hidden='true'
+                                        />
+
+                                        {'Create a New Chat'}
+                                    </Link>
+                                </li>
+                                <hr />
+                            </ul>
                             <ul role='list' className='flex flex-1 flex-col gap-y-7'>
                                 <li>
                                     <div className='text-xs font-semibold leading-6 text-gray-400'>Pinned Chats</div>
@@ -242,31 +252,36 @@ export default function SidebarShell({ children }) {
                                     <ul role='list' className='-mx-2 space-y-1'>
                                         {navigation &&
                                             navigation.map((item, index) => (
-                                                <li key={index}>
-                                                    <Link
-                                                        onClick={() => {
-                                                            // setItem to current
-                                                        }}
-                                                        to={item.href}
-                                                        className={classNames(
-                                                            item.current
-                                                                ? 'bg-gray-50 text-yellow-500'
-                                                                : 'text-gray-700 hover:text-yellow-500 hover:bg-gray-50',
-                                                            'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
-                                                        )}
-                                                    >
-                                                        <item.icon
+                                                <>
+                                                    <li key={index}>
+                                                        <Link
+                                                            onClick={() => {
+                                                                // setItem to current
+                                                            }}
+                                                            to={item.href}
                                                             className={classNames(
                                                                 item.current
-                                                                    ? 'text-yellow-500'
-                                                                    : 'text-gray-400 group-hover:text-yellow-500',
-                                                                'h-6 w-6 shrink-0'
+                                                                    ? 'bg-gray-50 text-yellow-500'
+                                                                    : 'text-gray-700 hover:text-yellow-500 hover:bg-gray-50',
+                                                                'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
                                                             )}
-                                                            aria-hidden='true'
-                                                        />
-                                                        {item.name ? item.name : 'New Chat'}
-                                                    </Link>
-                                                </li>
+                                                        >
+                                                            {item.icon && (
+                                                                <item.icon
+                                                                    className={classNames(
+                                                                        item.current
+                                                                            ? 'text-yellow-500'
+                                                                            : 'text-gray-400 group-hover:text-yellow-500',
+                                                                        'h-6 w-6 shrink-0'
+                                                                    )}
+                                                                    aria-hidden='true'
+                                                                />
+                                                            )}
+                                                            {item.name ? item.name.slice(0, 40) : 'New Chat'}
+                                                        </Link>
+                                                    </li>
+                                                    <hr />
+                                                </>
                                             ))}
                                     </ul>
                                 </li>
@@ -325,9 +340,9 @@ export default function SidebarShell({ children }) {
                                         <span className='sr-only'>View notifications</span>
                                         <AdjustmentsVerticalIcon
                                             onClick={() => {
-                                                setSlideOutOpen(true);
+                                                setSlideOutOpen(!slideOutOpen);
                                             }}
-                                            className='h-7 w-7'
+                                            className='h-7 w-7 cursor-pointer z-50'
                                             aria-hidden='true'
                                         />
                                     </button>

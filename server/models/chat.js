@@ -23,6 +23,10 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.JSON,
                 allowNull: false,
             },
+            pinned: {
+                type: DataTypes.BOOLEAN,
+                defaultValue: false,
+            },
             createdAt: {
                 type: DataTypes.DATE,
                 defaultValue: DataTypes.NOW,
