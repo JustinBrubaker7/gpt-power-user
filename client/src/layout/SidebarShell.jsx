@@ -10,9 +10,7 @@ import {
     Bars3Icon,
     AdjustmentsVerticalIcon,
     Cog6ToothIcon,
-    HomeIcon,
     XMarkIcon,
-    ChevronDoubleUpIcon,
     ChevronDoubleDownIcon,
     EllipsisHorizontalIcon,
 } from '@heroicons/react/24/outline';
@@ -39,7 +37,6 @@ export default function SidebarShell({ children }) {
     const [navigation, setNavigation] = useState();
     const [loading, setLoading] = useState(true);
     const [pinnedChats, setPinnedChats] = useState([]);
-    console.log(pinnedChats);
 
     useEffect(() => {
         getAllChats(currentUser).then((res) => {
@@ -47,7 +44,6 @@ export default function SidebarShell({ children }) {
                 logout();
                 return;
             }
-            console.log(res.chats);
             setLoading(false);
             const updatedNavigation = [
                 ...res.chats.map((chat) => ({
@@ -82,6 +78,14 @@ export default function SidebarShell({ children }) {
             updatedPinnedChats = [...pinnedChats, item];
         } else {
             updatedPinnedChats = pinnedChats.filter((chatItem) => chatItem.id !== item.id);
+            // update the navigation array\
+            const updatedNavigation = navigation.map((chatItem) => {
+                if (chatItem.id === item.id) {
+                    chatItem.pinned = false;
+                }
+                return chatItem;
+            });
+            setNavigation(updatedNavigation);
         }
 
         setPinnedChats(updatedPinnedChats);
@@ -432,11 +436,11 @@ export default function SidebarShell({ children }) {
                                                         {({ active }) => (
                                                             <div
                                                                 onClick={() => {
-                                                                    logout();
+                                                                    if (item.name === 'Sign out') logout();
                                                                 }}
                                                                 className={classNames(
                                                                     active ? 'bg-gray-50' : '',
-                                                                    'block px-3 py-1 text-sm leading-6 text-gray-900'
+                                                                    'block px-3 py-1 text-sm leading-6 text-gray-900 cursor-pointer'
                                                                 )}
                                                             >
                                                                 {item.name}

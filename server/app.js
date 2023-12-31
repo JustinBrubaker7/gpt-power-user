@@ -23,11 +23,11 @@ console.log(process.env.JWT_SECRET);
 
 const authRoutes = require('./routes/auth');
 const chatRoutes = require('./routes/chat');
-// const openaiRoutes = require('./routes/openai');
+const shortcutRoutes = require('./routes/shortcut');
 
 app.use('/auth', authRoutes);
 app.use('/chat', verifyToken, chatRoutes);
-// app.use('/openai', openaiRoutes);
+app.use('/shortcut', verifyToken, shortcutRoutes);
 
 // route that says hello
 app.get('/', (req, res) => {

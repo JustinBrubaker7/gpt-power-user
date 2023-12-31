@@ -1,7 +1,6 @@
 const HTTP_URL = import.meta.env.VITE_API_URL;
 
 export async function login(formData) {
-    console.log(formData, 'login');
 
     try {
         const response = await fetch(`${HTTP_URL}/auth/login`, {
@@ -12,11 +11,8 @@ export async function login(formData) {
             body: JSON.stringify({ email: formData.email, password: formData.password }),
         });
 
-        console.log(response, 'response');
         if (response.ok) {
-            console.log(response, 'response');
             const data = await response.json();
-            console.log(data, 'data');
             if (data) {
                 // Set the current user's auth token
                 return {

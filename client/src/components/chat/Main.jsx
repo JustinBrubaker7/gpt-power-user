@@ -3,6 +3,7 @@ import SidebarShell from '../../layout/SidebarShell.jsx';
 import { useAuth } from '../../context/auth-context.jsx';
 import { useLocation } from 'react-router-dom';
 import { establishWebSocketConnection, fetchChatById } from '../../api/chat.js';
+import { getAllShortCuts } from '../../api/shortcut.js';
 import CodeBlock from './code-block/CodeBlock.jsx';
 
 const models = [
@@ -32,26 +33,30 @@ const Main = () => {
         conversationType: messages.length ? 'continue' : 'new',
         userId: currentUser.userId,
     });
+    const [shortcuts, setShortcuts] = useState([]);
 
     const location = useLocation();
+
+    useEffect(() => {
+        if (currentUser) {
+            getAllShortCuts(currentUser).then((shortcuts) => {
+                setShortcuts(shortcuts);
+                console.log('shortcuts', shortcuts);
+            });
+        }
+    }, []);
 
     useEffect(() => {
         // see if the windoe is /chat/:chatId
         const chatIdFromUrl = window.location.pathname.split('/').pop();
 
-        console.log('chatIdFromUrl', chatIdFromUrl);
-
         if (chatIdFromUrl) {
             fetchChatById(chatIdFromUrl, currentUser).then((chat) => {
-                console.log('chat', chat);
                 setChatId(chatIdFromUrl);
                 setMessages(JSON.parse(chat.messages));
-                console.log('chat.messages', JSON.parse(chat.messages));
                 setSelectedModel(chat.model);
                 setIsLoading(false);
             });
-
-            console.log('chatIdFromUrl', chatIdFromUrl);
         } else {
             setIsLoading(false);
             setChatId(null);
@@ -104,11 +109,9 @@ const Main = () => {
     const handleKeyDown = (event) => {
         if (event.keyCode === 13 && !event.shiftKey) {
             // Check if the Enter key is pressed without the Shift key
-            console.log('Enter key pressed without Shift');
             handleSendMessage();
         } else if (event.keyCode === 13 && event.shiftKey) {
             // If Shift is also held down, do not submit
-            console.log('Enter key pressed with Shift, not submitting');
         }
     };
 
@@ -127,18 +130,21 @@ const Main = () => {
                 models={models}
                 disabled={messages.length}
             />
-            <div className='flex flex-col h-3/4 fixed bottom-10 w-5/6'>
-                <MessageList
-                    messages={messages}
-                    endOfMessagesRef={endOfMessagesRef}
-                    modelName={(models.find((model) => model.modelId === selectedModel) || {}).name}
-                />
-                <MessageInput
-                    newMessage={newMessage}
-                    setNewMessage={setNewMessage}
-                    handleSendMessage={handleSendMessage}
-                    handleKeyDown={handleKeyDown}
-                />
+            <div className='flex flex-col h-3/4 fixed bottom-5 w-5/6 justify-end items-center '>
+                <div className='w-3/5 mx-auto'>
+                    <MessageList
+                        messages={messages}
+                        endOfMessagesRef={endOfMessagesRef}
+                        modelName={(models.find((model) => model.modelId === selectedModel) || {}).name}
+                    />
+                    <MessageInput
+                        newMessage={newMessage}
+                        setNewMessage={setNewMessage}
+                        handleSendMessage={handleSendMessage}
+                        handleKeyDown={handleKeyDown}
+                        shortcuts={shortcuts}
+                    />
+                </div>
             </div>
         </SidebarShell>
     );
@@ -196,26 +202,76 @@ const MessageList = React.memo(({ messages, endOfMessagesRef, modelName }) => {
     );
 });
 
-const MessageInput = ({ newMessage, setNewMessage, handleSendMessage, handleKeyDown }) => {
+const MessageInput = ({ newMessage, setNewMessage, handleSendMessage, handleKeyDown, shortcuts }) => {
     const [rows, setRows] = useState(1);
+    const [showShortcuts, setShowShortcuts] = useState(false);
+    const [filterText, setFilterText] = useState('');
 
-    const handleChange = (e) => {
-        setNewMessage(e.target.value);
-        updateRows(e.target.value);
+    const addShortcutText = (text) => {
+        setNewMessage((currentMessage) => currentMessage.slice(0, -filterText.length - 1) + text + ' ');
+        setShowShortcuts(false);
+        setFilterText(''); // Clear filter text after selection
     };
 
+    const handleChange = (e) => {
+        const value = e.target.value;
+        setNewMessage(value);
+        updateRows(value);
+
+        if (value.includes('/')) {
+            const parts = value.split('/');
+            const lastPart = parts[parts.length - 1];
+            setShowShortcuts(true);
+            setFilterText(lastPart); // Set filter text based on the last part after "/"
+        } else {
+            setShowShortcuts(false);
+            setFilterText('');
+        }
+    };
     const updateRows = (text) => {
         const newLines = text.split('\n').length;
-        setRows(Math.min(Math.max(newLines, 1), 10)); // Limits between 2 and 10 rows
+        setRows(Math.min(Math.max(newLines, 1), 10));
     };
 
     const onSendMessage = () => {
-        handleSendMessage(); // Call the provided sendMessage function
-        setRows(1); // Reset rows to initial size
+        handleSendMessage();
+        setRows(1);
+        setShowShortcuts(false); // Hide shortcuts when message is sent
+    };
+
+    const renderShortcuts = () => {
+        if (!showShortcuts) return null;
+
+        // Filter the shortcuts based on the filterText
+        const filteredShortcuts = shortcuts.filter((shortcut) =>
+            shortcut.name.toLowerCase().includes(filterText.toLowerCase())
+        );
+
+        return (
+            <div className='absolute bg-white border p-2 bottom-11'>
+                <ul>
+                    {filteredShortcuts.map((shortcut) => (
+                        <ShortCutRow key={shortcut.id} shortcut={'/' + shortcut.name} text={shortcut.text} />
+                    ))}
+                </ul>
+            </div>
+        );
+    };
+
+    const ShortCutRow = ({ shortcut, text }) => {
+        return (
+            <div
+                className='flex items-center border-b p-2 hover:bg-gray-100 cursor-pointer'
+                onClick={() => addShortcutText(text)} // Handle click on shortcut
+            >
+                <span className='text-gray-500 text-sm'>{shortcut}</span>
+                <span className='text-gray-500 text-sm ml-2'>{text}</span>
+            </div>
+        );
     };
 
     return (
-        <div className='flex items-end'>
+        <div className='relative flex items-end w-full'>
             <textarea
                 type='text'
                 placeholder='Type your message...'
@@ -232,6 +288,7 @@ const MessageInput = ({ newMessage, setNewMessage, handleSendMessage, handleKeyD
                 rows={rows}
                 className='flex-grow mr-2 border border-gray-300 p-2 min-w-36 rounded-lg outline-none resize-none'
             ></textarea>
+            {renderShortcuts()}
             <button
                 onClick={onSendMessage}
                 className='bg-yellow-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'

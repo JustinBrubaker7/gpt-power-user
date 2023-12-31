@@ -2,18 +2,13 @@ const HTTP_URL = import.meta.env.VITE_API_URL;
 const WEBSOCKET_URL = import.meta.env.VITE_WEBSOCKET_URL;
 
 export const establishWebSocketConnection = (ws, currentUser, newMessage, setMessages, selectedModel, setSettings) => {
-    console.log(WEBSOCKET_URL);
-
     if (!ws.current || ws.current.readyState === WebSocket.CLOSED) {
-        console.log('Establishing new WebSocket connection');
         ws.current = new WebSocket(`${WEBSOCKET_URL}/${currentUser ? `?userId=${currentUser.token}` : ''}`);
 
         ws.current.onopen = () => {
-            console.log('Connected to the server');
             if (newMessage.trim()) {
                 // Send the initial user message as a serialized JSON object
                 const userMessage = createMessageObject(newMessage, 'user', selectedModel);
-                console.log('Sending message:', userMessage);
                 ws.current.send(JSON.stringify(userMessage));
 
                 // Add the initial user message to the messages array
@@ -26,7 +21,6 @@ export const establishWebSocketConnection = (ws, currentUser, newMessage, setMes
             }
         };
         ws.current.onmessage = (event) => {
-            console.log('Received message:', event.data);
             let eventMessage = JSON.parse(event.data).message;
 
             if (JSON.parse(event.data).id) {
@@ -102,7 +96,6 @@ const createMessageObject = (content, role, modelId) => {
 
 export const getAllChats = async (user) => {
     try {
-        console.log(user.userId);
         const response = await fetch(`${HTTP_URL}/chat/getall?userId=${user.userId}`, {
             method: 'GET',
             headers: {
