@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useState } from 'react';
 import { Dialog, Menu, Transition } from '@headlessui/react';
 import { useAuth } from '../context/auth-context.jsx';
-import { getAllChats } from '../api/chat.js';
+import { getAllChats, pinChatById } from '../api/chat.js';
 import BlackLogo from '../assets/black_transparent.png';
 import { Link } from 'react-router-dom';
 import AdvancedOptions from '../components/chat/AdvancedOptions.jsx';
@@ -12,7 +12,9 @@ import {
     Cog6ToothIcon,
     HomeIcon,
     XMarkIcon,
-    PencilSquareIcon,
+    ChevronDoubleUpIcon,
+    ChevronDoubleDownIcon,
+    EllipsisHorizontalIcon,
 } from '@heroicons/react/24/outline';
 import { ChevronDownIcon, MagnifyingGlassIcon, PlusIcon } from '@heroicons/react/20/solid';
 
@@ -37,9 +39,14 @@ export default function SidebarShell({ children }) {
     const [navigation, setNavigation] = useState();
     const [loading, setLoading] = useState(true);
     const [pinnedChats, setPinnedChats] = useState([]);
+    console.log(pinnedChats);
 
     useEffect(() => {
         getAllChats(currentUser).then((res) => {
+            if (res.error) {
+                logout();
+                return;
+            }
             console.log(res.chats);
             setLoading(false);
             const updatedNavigation = [
@@ -48,13 +55,38 @@ export default function SidebarShell({ children }) {
                     href: `/chat/${chat.id}`,
                     icon: null,
                     current: false,
+                    id: chat.id,
+                    pinned: chat.pinned,
                 })),
             ];
             setNavigation(updatedNavigation);
             const pinnedChatsArray = res.chats.filter((chat) => chat.pinned);
-            setPinnedChats(pinnedChatsArray);
+            const updatedPinnedChats = pinnedChatsArray.map((chat) => ({
+                name: chat.title || 'New Chat', // Fallback to 'Chat' if title is not available
+                href: `/chat/${chat.id}`,
+                icon: null,
+                current: false,
+                id: chat.id,
+                pinned: chat.pinned,
+            }));
+            setPinnedChats(updatedPinnedChats);
         });
     }, []);
+
+    const handlePinItem = (item) => {
+        item.pinned = !item.pinned;
+        console.log(item);
+
+        let updatedPinnedChats;
+        if (item.pinned) {
+            updatedPinnedChats = [...pinnedChats, item];
+        } else {
+            updatedPinnedChats = pinnedChats.filter((chatItem) => chatItem.id !== item.id);
+        }
+
+        setPinnedChats(updatedPinnedChats);
+        pinChatById(item.id, currentUser, item.pinned); // Added item.pinned to indicate the pinning status
+    };
 
     return (
         <>
@@ -126,15 +158,17 @@ export default function SidebarShell({ children }) {
                                                                             'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
                                                                         )}
                                                                     >
-                                                                        <item.icon
-                                                                            className={classNames(
-                                                                                item.current
-                                                                                    ? 'text-indigo-600'
-                                                                                    : 'text-gray-400 group-hover:text-indigo-600',
-                                                                                'h-6 w-6 shrink-0'
-                                                                            )}
-                                                                            aria-hidden='true'
-                                                                        />
+                                                                        {item.icon && (
+                                                                            <item.icon
+                                                                                className={classNames(
+                                                                                    item.current
+                                                                                        ? 'text-indigo-600'
+                                                                                        : 'text-gray-400 group-hover:text-indigo-600',
+                                                                                    'h-6 w-6 shrink-0'
+                                                                                )}
+                                                                                aria-hidden='true'
+                                                                            />
+                                                                        )}
                                                                         {item.name ? item.name : 'loading'}
                                                                     </Link>
                                                                 </li>
@@ -221,65 +255,81 @@ export default function SidebarShell({ children }) {
                                 <hr />
                             </ul>
                             <ul role='list' className='flex flex-1 flex-col gap-y-7'>
-                                <li>
-                                    <div className='text-xs font-semibold leading-6 text-gray-400'>Pinned Chats</div>
-                                    <ul role='list' className='-mx-2 mt-2 space-y-1'>
-                                        {pinnedChats.map((chat) => (
-                                            <li key={chat.name}>
-                                                <Link
-                                                    to={`/chat/${chat.id}`}
-                                                    className={classNames(
-                                                        chat.current
-                                                            ? 'bg-gray-50 text-indigo-600'
-                                                            : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50',
-                                                        'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
-                                                    )}
-                                                >
-                                                    <span className='truncate'>{chat.title}</span>
-                                                </Link>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </li>
+                                {pinnedChats.length > 0 && (
+                                    <li>
+                                        <div className='text-xs font-semibold leading-6 text-gray-400'>Pinned Chats</div>
+                                        <ul role='list' className='-mx-2 mt-2 space-y-1'>
+                                            {pinnedChats.map((chat) => (
+                                                <Fragment key={chat.id}>
+                                                    <div>
+                                                        <li className='flex flex-row items-center justify-between p-1'>
+                                                            <Link
+                                                                to={`/chat/${chat.id}`}
+                                                                className={classNames(
+                                                                    chat.current
+                                                                        ? 'bg-gray-50 text-indigo-600'
+                                                                        : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50',
+                                                                    'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
+                                                                )}
+                                                            >
+                                                                <span className='truncate'>{chat.name}</span>
+                                                            </Link>
+                                                            <ChevronDoubleDownIcon
+                                                                onClick={() => handlePinItem(chat)}
+                                                                className='h-6 w-6 shrink-0 text-gray-400 hover:text-yellow-500 cursor-pointer'
+                                                            />
+                                                        </li>
+                                                    </div>
+                                                    <hr />
+                                                </Fragment>
+                                            ))}
+                                        </ul>
+                                    </li>
+                                )}
                                 <li>
                                     <ul role='list' className='-mx-2 space-y-1'>
                                         <div className='text-xs font-semibold leading-6 text-gray-400 pl-2'>All Chats</div>
                                         {navigation &&
                                             navigation.map((item, index) => (
-                                                <>
-                                                    <li key={index}>
-                                                        <Link
-                                                            onClick={() => {
-                                                                // setItem to current
-                                                            }}
-                                                            to={item.href}
-                                                            className={classNames(
-                                                                item.current
-                                                                    ? 'bg-gray-50 text-yellow-500'
-                                                                    : 'text-gray-700 hover:text-yellow-500 hover:bg-gray-50',
-                                                                'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
-                                                            )}
-                                                        >
-                                                            {item.icon && (
-                                                                <item.icon
-                                                                    className={classNames(
-                                                                        item.current
-                                                                            ? 'text-yellow-500'
-                                                                            : 'text-gray-400 group-hover:text-yellow-500',
-                                                                        'h-6 w-6 shrink-0'
-                                                                    )}
-                                                                    aria-hidden='true'
-                                                                />
-                                                            )}
-                                                            {item.name
-                                                                ? item.name.length > 40
-                                                                    ? item.name.slice(0, 40) + '...'
-                                                                    : item.name
-                                                                : 'New Chat'}
-                                                        </Link>
-                                                    </li>
+                                                <Fragment key={index}>
+                                                    <div className='flex flex-row items-center justify-between p-1'>
+                                                        <li>
+                                                            <Link
+                                                                to={item.href}
+                                                                className={classNames(
+                                                                    item.current
+                                                                        ? 'bg-gray-50 text-yellow-500'
+                                                                        : 'text-gray-700 hover:text-yellow-500 hover:bg-gray-50',
+                                                                    'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
+                                                                )}
+                                                            >
+                                                                {item.icon && (
+                                                                    <item.icon
+                                                                        className={classNames(
+                                                                            item.current
+                                                                                ? 'text-yellow-500'
+                                                                                : 'text-gray-400 group-hover:text-yellow-500',
+                                                                            'h-6 w-6 shrink-0'
+                                                                        )}
+                                                                        aria-hidden='true'
+                                                                    />
+                                                                )}
+                                                                {item.name
+                                                                    ? item.name.length > 40
+                                                                        ? item.name.slice(0, 40) + '...'
+                                                                        : item.name
+                                                                    : 'New Chat'}
+                                                            </Link>
+                                                        </li>
+                                                        {!item.pinned && (
+                                                            <EllipsisHorizontalIcon
+                                                                onClick={() => handlePinItem(item)}
+                                                                className='h-6 w-6 shrink-0 text-gray-400 hover:text-yellow-500 cursor-pointer'
+                                                            />
+                                                        )}
+                                                    </div>
                                                     <hr />
-                                                </>
+                                                </Fragment>
                                             ))}
                                     </ul>
                                 </li>

@@ -112,7 +112,9 @@ export const getAllChats = async (user) => {
         });
 
         if (!response.ok) {
-            throw new Error('Failed to fetch chats');
+            return {
+                error: 'Failed to fetch chats',
+            };
         }
 
         const chats = await response.json();
@@ -142,5 +144,27 @@ export const fetchChatById = async (chatId, user) => {
     } catch (error) {
         console.error(error);
         throw new Error('Failed to fetch chat');
+    }
+};
+
+export const pinChatById = async (chatId, user) => {
+    try {
+        const response = await fetch(`${HTTP_URL}/chat/pin?chatId=${chatId}&userId=${user.userId}`, {
+            method: 'PATCH',
+            headers: {
+                authorization: `${user.token}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to pin chat');
+        }
+
+        const chat = await response.json();
+        return chat.chat;
+    } catch (error) {
+        console.error(error);
+        throw new Error('Failed to pin chat');
     }
 };

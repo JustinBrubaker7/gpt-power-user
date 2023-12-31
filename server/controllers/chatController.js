@@ -103,4 +103,36 @@ const nameChats = async () => {
     }
 };
 
-module.exports = { addChat, getAllChats, getOneChat, nameChats };
+const pinChatById = async (req, res) => {
+    try {
+        const chat = await Chat.findOne({
+            where: {
+                id: req.query.chatId,
+                userId: req.query.userId,
+            },
+        });
+
+        if (!chat) {
+            return res.status(404).json({ message: 'Chat not found' });
+        }
+
+        await Chat.update(
+            {
+                pinned: !chat.pinned,
+            },
+            {
+                where: {
+                    id: req.query.chatId,
+                    userId: req.query.userId,
+                },
+            }
+        );
+
+        res.status(200).json({ message: 'Chat pinned successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+module.exports = { addChat, getAllChats, getOneChat, nameChats, pinChatById };
