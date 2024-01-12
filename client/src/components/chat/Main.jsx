@@ -130,21 +130,19 @@ const Main = () => {
                 models={models}
                 disabled={messages.length}
             />
-            <div className='flex flex-col h-3/4 fixed bottom-5 w-5/6 justify-end items-center '>
-                <div className='w-3/5 mx-auto'>
-                    <MessageList
-                        messages={messages}
-                        endOfMessagesRef={endOfMessagesRef}
-                        modelName={(models.find((model) => model.modelId === selectedModel) || {}).name}
-                    />
-                    <MessageInput
-                        newMessage={newMessage}
-                        setNewMessage={setNewMessage}
-                        handleSendMessage={handleSendMessage}
-                        handleKeyDown={handleKeyDown}
-                        shortcuts={shortcuts}
-                    />
-                </div>
+            <div className='flex flex-col h-4/5 fixed bottom-10 w-5/6'>
+                <MessageList
+                    messages={messages}
+                    endOfMessagesRef={endOfMessagesRef}
+                    modelName={(models.find((model) => model.modelId === selectedModel) || {}).name}
+                />
+                <MessageInput
+                    newMessage={newMessage}
+                    setNewMessage={setNewMessage}
+                    handleSendMessage={handleSendMessage}
+                    handleKeyDown={handleKeyDown}
+                    shortcuts={shortcuts}
+                />
             </div>
         </SidebarShell>
     );
@@ -174,7 +172,7 @@ const Header = ({ selectedModel, setSelectedModel, models, disabled }) => {
 
 const MessageList = React.memo(({ messages, endOfMessagesRef, modelName }) => {
     return (
-        <div className='flex-grow overflow-y-auto mb-2 p-2 mx-auto w-5/6'>
+        <div className='flex-grow overflow-y-auto mb-2 p-2 mx-auto w-3/5'>
             {messages.map((message, index) => (
                 <div
                     key={index}
@@ -248,7 +246,7 @@ const MessageInput = ({ newMessage, setNewMessage, handleSendMessage, handleKeyD
         );
 
         return (
-            <div className='absolute bg-white border p-2 bottom-11'>
+            <div className='absolute bg-white border p-2 bottom-11 '>
                 <ul>
                     {filteredShortcuts.map((shortcut) => (
                         <ShortCutRow key={shortcut.id} shortcut={'/' + shortcut.name} text={shortcut.text} />
@@ -265,13 +263,14 @@ const MessageInput = ({ newMessage, setNewMessage, handleSendMessage, handleKeyD
                 onClick={() => addShortcutText(text)} // Handle click on shortcut
             >
                 <span className='text-gray-500 text-sm'>{shortcut}</span>
-                <span className='text-gray-500 text-sm ml-2'>{text}</span>
+                <span className='text-gray-500 text-sm ml-2'>-</span>
+                <span className='text-gray-500 text-sm ml-2'>{text.length > 75 ? `${text.slice(0, 75)}...` : text}</span>
             </div>
         );
     };
 
     return (
-        <div className='relative flex items-end w-full'>
+        <div className='relative flex items-end w-4/5 mx-auto'>
             <textarea
                 type='text'
                 placeholder='Type your message...'
