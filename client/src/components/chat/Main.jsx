@@ -204,6 +204,22 @@ const MessageInput = ({ newMessage, setNewMessage, handleSendMessage, handleKeyD
     const [rows, setRows] = useState(1);
     const [showShortcuts, setShowShortcuts] = useState(false);
     const [filterText, setFilterText] = useState('');
+    const [focusedShortcutIndex, setFocusedShortcutIndex] = useState(-1); // New state for focused shortcut
+
+    const handleKeyDown2 = (e) => {
+        if (showShortcuts) {
+            if (e.key === 'Tab') {
+                e.preventDefault(); // Prevent default tabbing behavior
+                const filteredShortcuts = shortcuts.filter((shortcut) =>
+                    shortcut.name.toLowerCase().includes(filterText.toLowerCase())
+                );
+                const newIndex = (focusedShortcutIndex + 1) % filteredShortcuts.length;
+                setFocusedShortcutIndex(newIndex);
+            }
+        } else {
+            // Other key handling
+        }
+    };
 
     const addShortcutText = (text) => {
         setNewMessage((currentMessage) => currentMessage.slice(0, -filterText.length - 1) + text + ' ');
@@ -246,21 +262,28 @@ const MessageInput = ({ newMessage, setNewMessage, handleSendMessage, handleKeyD
         );
 
         return (
-            <div className='absolute bg-white border p-2 bottom-11 '>
+            <div className='absolute bg-white border p-2 bottom-11'>
                 <ul>
-                    {filteredShortcuts.map((shortcut) => (
-                        <ShortCutRow key={shortcut.id} shortcut={'/' + shortcut.name} text={shortcut.text} />
+                    {filteredShortcuts.map((shortcut, index) => (
+                        <ShortCutRow
+                            key={shortcut.id}
+                            shortcut={'/' + shortcut.name}
+                            text={shortcut.text}
+                            isFocused={index === focusedShortcutIndex}
+                        />
                     ))}
                 </ul>
             </div>
         );
     };
 
-    const ShortCutRow = ({ shortcut, text }) => {
+    const ShortCutRow = ({ shortcut, text, isFocused }) => {
         return (
             <div
-                className='flex items-center border-b p-2 hover:bg-gray-100 cursor-pointer'
-                onClick={() => addShortcutText(text)} // Handle click on shortcut
+                className={`flex items-center border-b p-2 ${
+                    isFocused ? 'bg-blue-100' : 'hover:bg-gray-100'
+                } cursor-pointer`}
+                onClick={() => addShortcutText(text)}
             >
                 <span className='text-gray-500 text-sm'>{shortcut}</span>
                 <span className='text-gray-500 text-sm ml-2'>-</span>
@@ -279,9 +302,17 @@ const MessageInput = ({ newMessage, setNewMessage, handleSendMessage, handleKeyD
                 onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
-                        onSendMessage();
+                        if (showShortcuts && focusedShortcutIndex >= 0) {
+                            const filteredShortcuts = shortcuts.filter((shortcut) =>
+                                shortcut.name.toLowerCase().includes(filterText.toLowerCase())
+                            );
+                            addShortcutText(filteredShortcuts[focusedShortcutIndex].text);
+                            setFocusedShortcutIndex(-1); // Reset focus index
+                        } else {
+                            onSendMessage();
+                        }
                     } else {
-                        handleKeyDown(e);
+                        handleKeyDown2(e);
                     }
                 }}
                 rows={rows}
