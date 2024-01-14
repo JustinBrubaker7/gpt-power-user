@@ -130,7 +130,7 @@ const Main = () => {
                 models={models}
                 disabled={messages.length}
             />
-            <div className='flex flex-col h-4/5 fixed bottom-10 w-5/6'>
+            <div className='flex flex-col h-4/5 fixed bottom-5 md:bottom-10 md:w-5/6 pr-2'>
                 <MessageList
                     messages={messages}
                     endOfMessagesRef={endOfMessagesRef}
@@ -172,7 +172,7 @@ const Header = ({ selectedModel, setSelectedModel, models, disabled }) => {
 
 const MessageList = React.memo(({ messages, endOfMessagesRef, modelName }) => {
     return (
-        <div className='flex-grow overflow-y-auto mb-2 p-2 mx-auto w-3/5'>
+        <div className='flex-grow overflow-y-auto mb-2 p-2 mx-auto w-full md:w-3/5'>
             {messages.map((message, index) => (
                 <div
                     key={index}
@@ -293,7 +293,7 @@ const MessageInput = ({ newMessage, setNewMessage, handleSendMessage, handleKeyD
     };
 
     return (
-        <div className='relative flex items-end w-4/5 mx-auto'>
+        <div className='relative flex items-end w-full md:w-4/5 mx-auto'>
             <textarea
                 type='text'
                 placeholder='Type your message...'
