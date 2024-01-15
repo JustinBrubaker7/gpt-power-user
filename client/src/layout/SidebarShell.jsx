@@ -31,7 +31,7 @@ function classNames(...classes) {
     return classes.filter(Boolean).join(' ');
 }
 
-export default function SidebarShell({ children }) {
+export default function SidebarShell({ children, ...props }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [slideOutOpen, setSlideOutOpen] = useState(false);
     const { currentUser, logout } = useAuth();
@@ -430,8 +430,13 @@ export default function SidebarShell({ children }) {
                     </div>
 
                     <main className=''>
-                        <SlideOut open={slideOutOpen} setOpen={setSlideOutOpen}>
-                            <AdvancedOptions />
+                        <SlideOut
+                            open={slideOutOpen}
+                            setOpen={setSlideOutOpen}
+                            settings={props.settings}
+                            setSettings={props.setSettings}
+                        >
+                            <AdvancedOptions settings={props.settings} setSettings={props.setSettings} />
                         </SlideOut>
                         <div className='px-4 py-2'>{children}</div>
                     </main>

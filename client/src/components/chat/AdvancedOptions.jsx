@@ -1,12 +1,12 @@
 import React from 'react';
 
-export default function AdvancedOptions({ settings, updateSettings }) {
+export default function AdvancedOptions({ settings, setSettings }) {
     return (
         <div className='bg-gray-100 p-4 rounded-lg shadow'>
             <h2 className='text-xl font-semibold mb-4'>Advanced Settings</h2>
 
             <div className='grid grid-cols-1 md:grid-cols-1 gap-8'>
-                <ModelSelect model={settings?.model} updateSettings={updateSettings} />
+                <ModelSelect model={settings?.model} setSettings={setSettings} models={settings?.models} />
                 <SliderControl
                     id='temperature'
                     label='Temperature'
@@ -14,7 +14,7 @@ export default function AdvancedOptions({ settings, updateSettings }) {
                     min={0}
                     max={1}
                     step={0.01}
-                    updateSettings={updateSettings}
+                    updateSettings={setSettings}
                 />
                 <SliderControl
                     id='maxLength'
@@ -23,7 +23,7 @@ export default function AdvancedOptions({ settings, updateSettings }) {
                     min={1}
                     max={100}
                     step={1}
-                    updateSettings={updateSettings}
+                    updateSettings={setSettings}
                 />
                 <SliderControl
                     id='topP'
@@ -32,13 +32,13 @@ export default function AdvancedOptions({ settings, updateSettings }) {
                     min={0}
                     max={1}
                     step={0.01}
-                    updateSettings={updateSettings}
+                    updateSettings={setSettings}
                 />
                 <SliderControl
                     id='frequencyPenalty'
                     label='Frequency Penalty'
                     value={settings?.frequencyPenalty}
-                    updateSettings={updateSettings}
+                    updateSettings={setSettings}
                     min={0}
                     max={2}
                     step={0.01}
@@ -47,7 +47,7 @@ export default function AdvancedOptions({ settings, updateSettings }) {
                     id='presencePenalty'
                     label='Presence Penalty'
                     value={settings?.presencePenalty}
-                    updateSettings={updateSettings}
+                    updateSettings={setSettings}
                     min={0}
                     max={2}
                     step={0.01}
@@ -57,7 +57,7 @@ export default function AdvancedOptions({ settings, updateSettings }) {
     );
 }
 
-function ModelSelect({ model, updateSettings }) {
+function ModelSelect({ model, setSettings, models }) {
     return (
         <div>
             <label htmlFor='model' className='block text-sm font-medium text-gray-700'>
@@ -65,11 +65,18 @@ function ModelSelect({ model, updateSettings }) {
             </label>
             <select
                 id='model'
-                value={model}
-                onChange={(e) => updateSettings((prev) => ({ ...prev, model: e.target.value }))}
+                defaultValue={model}
+                onChange={(e) => {
+                    setSettings((prev) => ({ ...prev, model: e.target.value }));
+                    console.log(e.target.value);
+                }}
                 className='mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500'
             >
-                {/* Add model options here */}
+                {models.map((model) => (
+                    <option key={model.modelId} value={model.modelId}>
+                        {model.name}
+                    </option>
+                ))}
             </select>
         </div>
     );

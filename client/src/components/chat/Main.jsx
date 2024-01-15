@@ -32,7 +32,18 @@ const Main = () => {
         temperature: 0.7, // Hardcoded temperature
         conversationType: messages.length ? 'continue' : 'new',
         userId: currentUser.userId,
+        models: models,
     });
+
+    useEffect(() => {
+        setSettings((settings) => ({ ...settings, model: selectedModel }));
+    }, [selectedModel]);
+
+    useEffect(() => {
+        setSelectedModel(settings.model);
+    }, [settings.model]);
+
+    console.log('settings', settings);
     const [shortcuts, setShortcuts] = useState([]);
 
     const location = useLocation();
@@ -123,7 +134,7 @@ const Main = () => {
         );
 
     return (
-        <SidebarShell>
+        <SidebarShell settings={settings} setSettings={setSettings} chatId={chatId}>
             <Header
                 selectedModel={selectedModel}
                 setSelectedModel={setSelectedModel}
@@ -296,7 +307,7 @@ const MessageInput = ({ newMessage, setNewMessage, handleSendMessage, handleKeyD
         <div className='relative flex items-end w-full md:w-4/5 mx-auto'>
             <textarea
                 type='text'
-                placeholder='Type your message...'
+                placeholder='Type your message... or use / to insert a shortcut'
                 value={newMessage}
                 onChange={handleChange}
                 onKeyDown={(e) => {
