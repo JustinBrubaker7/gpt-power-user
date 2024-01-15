@@ -6,6 +6,7 @@ import BlackLogo from '../assets/black_transparent.png';
 import { Link } from 'react-router-dom';
 import AdvancedOptions from '../components/chat/AdvancedOptions.jsx';
 import SlideOut from './SlideOut.jsx';
+import pinSVG from '../assets/pin.svg';
 import {
     Bars3Icon,
     AdjustmentsVerticalIcon,
@@ -295,9 +296,15 @@ export default function SidebarShell({ children, ...props }) {
                                                             </Link>
                                                         </li>
                                                         {!item.pinned && (
-                                                            <EllipsisHorizontalIcon
+                                                            // <EllipsisHorizontalIcon
+                                                            //     onClick={() => handlePinItem(item)}
+                                                            //     className='h-6 w-6 shrink-0 text-gray-400 hover:text-yellow-500 cursor-pointer'
+                                                            // />
+                                                            <img
+                                                                src={pinSVG}
+                                                                alt='pin'
                                                                 onClick={() => handlePinItem(item)}
-                                                                className='h-6 w-6 shrink-0 text-gray-400 hover:text-yellow-500 cursor-pointer'
+                                                                className='h-6 w-6 shrink-0 text-gray-400 hover:text-yellow-500 cursor-pointer opacity-30 hover:opacity-80'
                                                             />
                                                         )}
                                                     </div>

@@ -6,6 +6,7 @@ import { establishWebSocketConnection, fetchChatById } from '../../api/chat.js';
 import { getAllShortCuts } from '../../api/shortcut.js';
 import CodeBlock from './code-block/CodeBlock.jsx';
 
+
 const models = [
     {
         name: 'GPT-3.5',
