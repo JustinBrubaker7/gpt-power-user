@@ -243,14 +243,14 @@ export default function SidebarShell({ children, ...props }) {
                                                                     chat.current
                                                                         ? 'bg-gray-50 text-indigo-600'
                                                                         : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50',
-                                                                    'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
+                                                                    'group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold w-full'
                                                                 )}
                                                             >
                                                                 <span className='truncate'>{chat.name}</span>
                                                             </Link>
                                                             <ChevronDoubleDownIcon
                                                                 onClick={() => handlePinItem(chat)}
-                                                                className='h-6 w-6 shrink-0 text-gray-400 hover:text-yellow-500 cursor-pointer'
+                                                                className='h-5 w-5 shrink-0 text-gray-400 hover:text-yellow-500 cursor-pointer'
                                                             />
                                                         </li>
                                                     </div>
@@ -265,36 +265,34 @@ export default function SidebarShell({ children, ...props }) {
                                         <div className='text-xs font-semibold leading-6 text-gray-400 pl-2'>All Chats</div>
                                         {navigation &&
                                             navigation.map((item, index) => (
-                                                <Fragment key={index}>
+                                                <li key={index}>
                                                     <div className='flex flex-row items-center justify-between p-1'>
-                                                        <li>
-                                                            <Link
-                                                                to={item.href}
-                                                                className={classNames(
-                                                                    item.current
-                                                                        ? 'bg-gray-50 text-yellow-500'
-                                                                        : 'text-gray-700 hover:text-yellow-500 hover:bg-gray-50',
-                                                                    'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
-                                                                )}
-                                                            >
-                                                                {item.icon && (
-                                                                    <item.icon
-                                                                        className={classNames(
-                                                                            item.current
-                                                                                ? 'text-yellow-500'
-                                                                                : 'text-gray-400 group-hover:text-yellow-500',
-                                                                            'h-6 w-6 shrink-0'
-                                                                        )}
-                                                                        aria-hidden='true'
-                                                                    />
-                                                                )}
-                                                                {item.name
-                                                                    ? item.name.length > 40
-                                                                        ? item.name.slice(0, 40) + '...'
-                                                                        : item.name
-                                                                    : 'New Chat'}
-                                                            </Link>
-                                                        </li>
+                                                        <Link
+                                                            to={item.href}
+                                                            className={classNames(
+                                                                item.current
+                                                                    ? 'bg-gray-50 text-yellow-500'
+                                                                    : 'text-gray-700 hover:text-yellow-500 hover:bg-gray-50',
+                                                                'group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold w-full'
+                                                            )}
+                                                        >
+                                                            {item.icon && (
+                                                                <item.icon
+                                                                    className={classNames(
+                                                                        item.current
+                                                                            ? 'text-yellow-500'
+                                                                            : 'text-gray-400 group-hover:text-yellow-500',
+                                                                        'h-6 w-6 shrink-0'
+                                                                    )}
+                                                                    aria-hidden='true'
+                                                                />
+                                                            )}
+                                                            {item.name
+                                                                ? item.name.length > 30
+                                                                    ? item.name.slice(0, 30) + '...'
+                                                                    : item.name
+                                                                : 'New Chat'}
+                                                        </Link>
                                                         {!item.pinned && (
                                                             // <EllipsisHorizontalIcon
                                                             //     onClick={() => handlePinItem(item)}
@@ -304,12 +302,12 @@ export default function SidebarShell({ children, ...props }) {
                                                                 src={pinSVG}
                                                                 alt='pin'
                                                                 onClick={() => handlePinItem(item)}
-                                                                className='h-6 w-6 shrink-0 text-gray-400 hover:text-yellow-500 cursor-pointer opacity-30 hover:opacity-80'
+                                                                className='h-5 w-5 shrink-0 text-gray-400 hover:text-yellow-500 cursor-pointer opacity-30 hover:opacity-80'
                                                             />
                                                         )}
                                                     </div>
                                                     <hr />
-                                                </Fragment>
+                                                </li>
                                             ))}
                                     </ul>
                                 </li>

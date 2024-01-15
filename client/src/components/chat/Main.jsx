@@ -6,7 +6,6 @@ import { establishWebSocketConnection, fetchChatById } from '../../api/chat.js';
 import { getAllShortCuts } from '../../api/shortcut.js';
 import CodeBlock from './code-block/CodeBlock.jsx';
 
-
 const models = [
     {
         name: 'GPT-3.5',
@@ -184,24 +183,23 @@ const Header = ({ selectedModel, setSelectedModel, models, disabled }) => {
 
 const MessageList = React.memo(({ messages, endOfMessagesRef, modelName }) => {
     return (
-        <div className='flex-grow overflow-y-auto mb-2 p-2 mx-auto w-full md:w-3/5'>
+        <div id='no-scrollbar' className=' flex-grow overflow-y-auto mb-2 p-2 mx-auto w-full md:w-3/5'>
             {messages.map((message, index) => (
-                <div
-                    key={index}
-                    className={`text-white flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'}`}
-                >
-                    <div className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'}`}>
+                <div key={index} className={`text-white flex flex-col items-start py-2`}>
+                    <div className={`flex flex-col items-start`}>
                         <div className={`flex flex-col p-2 min-w-36 rounded-lg `}>
-                            <span
-                                className={`text-xs text-gray-500  ${message.role === 'user' ? 'text-left' : 'text-left'}`}
+                            <div
+                                className={`text-xs text-gray-500  ${
+                                    message.role === 'user' ? 'text-left' : 'text-left'
+                                } flex items-center pb-2`}
                             >
                                 <span className='inline-block h-6 w-6 overflow-hidden rounded-full bg-gray-100'>
                                     <svg className='h-full w-full text-gray-300' fill='currentColor' viewBox='0 0 24 24'>
                                         <path d='M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z' />
                                     </svg>
                                 </span>{' '}
-                                {message.role === 'user' ? 'You' : `${modelName}`}
-                            </span>
+                                <p className='ml-2'>{message.role === 'user' ? 'You' : `${modelName}`}</p>
+                            </div>
                             <div className='text-md'>{formatMessage(message.content)}</div>
                         </div>
                     </div>
