@@ -24,3 +24,28 @@ export const getAllShortCuts = async (user) => {
         throw new Error('Failed to fetch shortcuts');
     }
 };
+
+export const createShortCut = async (user, shortcut) => {
+    try {
+        const response = await fetch(`${HTTP_URL}/shortcut/createshortcut`, {
+            method: 'POST',
+            headers: {
+                authorization: `${user.token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(shortcut),
+        });
+
+        if (!response.ok) {
+            return {
+                error: 'Failed to create shortcut',
+            };
+        }
+
+        const newShortcut = await response.json();
+        return newShortcut;
+    } catch (error) {
+        console.error(error);
+        throw new Error('Failed to create shortcut');
+    }
+};

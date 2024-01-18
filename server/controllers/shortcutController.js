@@ -13,4 +13,13 @@ const getAllShortCuts = async (req, res) => {
     }
 };
 
-module.exports = { getAllShortCuts };
+const createShortcut = async (req, res) => {
+    try {
+        const shortcut = await Shortcut.create(req.body);
+        res.status(200).json({ shortcut });
+    } catch (error) {
+        console.error(error);
+    }
+};
+
+module.exports = { getAllShortCuts, createShortcut };

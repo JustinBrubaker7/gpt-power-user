@@ -9,12 +9,8 @@ import SlideOut from './SlideOut.jsx';
 import pinSVG from '../assets/pin.svg';
 import { Bars3Icon, AdjustmentsVerticalIcon, Cog6ToothIcon, XMarkIcon, Cog8ToothIcon } from '@heroicons/react/24/outline';
 import { ChevronDownIcon, MagnifyingGlassIcon, PlusIcon } from '@heroicons/react/20/solid';
+import SaveSnippets from '../components/chat/SaveSnippets.jsx';
 
-const teams = [
-    { id: 1, name: 'Heroicons', href: '#', initial: 'H', current: false },
-    { id: 2, name: 'Tailwind Labs', href: '#', initial: 'T', current: false },
-    { id: 3, name: 'Workcation', href: '#', initial: 'W', current: false },
-];
 const userNavigation = [
     { name: 'Your profile', href: '#' },
     { name: 'Sign out', href: '#' },
@@ -436,6 +432,7 @@ export default function SidebarShell({ children, ...props }) {
                             title='Advanced Settings'
                         >
                             <AdvancedOptions settings={props.settings} setSettings={props.setSettings} />
+                            <SaveSnippets />
                         </SlideOut>
                         <div className='px-4 py-2'>{children}</div>
                     </main>
