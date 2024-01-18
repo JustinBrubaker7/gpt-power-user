@@ -7,15 +7,7 @@ import { Link } from 'react-router-dom';
 import AdvancedOptions from '../components/chat/AdvancedOptions.jsx';
 import SlideOut from './SlideOut.jsx';
 import pinSVG from '../assets/pin.svg';
-import {
-    Bars3Icon,
-    AdjustmentsVerticalIcon,
-    Cog6ToothIcon,
-    XMarkIcon,
-    ChevronDoubleDownIcon,
-    EllipsisHorizontalIcon,
-    Cog8ToothIcon,
-} from '@heroicons/react/24/outline';
+import { Bars3Icon, AdjustmentsVerticalIcon, Cog6ToothIcon, XMarkIcon, Cog8ToothIcon } from '@heroicons/react/24/outline';
 import { ChevronDownIcon, MagnifyingGlassIcon, PlusIcon } from '@heroicons/react/20/solid';
 
 const teams = [
@@ -76,21 +68,22 @@ export default function SidebarShell({ children, ...props }) {
         console.log(item);
 
         let updatedPinnedChats;
+        let updatedNavigation;
+
         if (item.pinned) {
+            // Add to pinned chats
             updatedPinnedChats = [...pinnedChats, item];
+            // Remove from main navigation
+            updatedNavigation = navigation.filter((chatItem) => chatItem.id !== item.id);
         } else {
+            // Remove from pinned chats
             updatedPinnedChats = pinnedChats.filter((chatItem) => chatItem.id !== item.id);
-            // update the navigation array\
-            const updatedNavigation = navigation.map((chatItem) => {
-                if (chatItem.id === item.id) {
-                    chatItem.pinned = false;
-                }
-                return chatItem;
-            });
-            setNavigation(updatedNavigation);
+            // Add back to main navigation
+            updatedNavigation = [...navigation, item];
         }
 
         setPinnedChats(updatedPinnedChats);
+        setNavigation(updatedNavigation);
         pinChatById(item.id, currentUser, item.pinned); // Added item.pinned to indicate the pinning status
     };
 
@@ -242,15 +235,15 @@ export default function SidebarShell({ children, ...props }) {
                                                                 className={classNames(
                                                                     chat.current
                                                                         ? 'bg-gray-50 text-indigo-600'
-                                                                        : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50',
+                                                                        : 'text-gray-700 hover:text-yellow-600 hover:bg-gray-50',
                                                                     'group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold w-full'
                                                                 )}
                                                             >
                                                                 <span className='truncate'>{chat.name}</span>
                                                             </Link>
-                                                            <ChevronDoubleDownIcon
+                                                            <XMarkIcon
                                                                 onClick={() => handlePinItem(chat)}
-                                                                className='h-5 w-5 shrink-0 text-gray-400 hover:text-yellow-500 cursor-pointer'
+                                                                className='h-5 w-5 shrink-0 text-gray-400 hover:text-red-500 cursor-pointer'
                                                             />
                                                         </li>
                                                     </div>
@@ -368,7 +361,7 @@ export default function SidebarShell({ children, ...props }) {
                                             onClick={() => {
                                                 setSlideOutOpen(!slideOutOpen);
                                             }}
-                                            className='h-7 w-7 cursor-pointer z-50'
+                                            className='h-7 w-7 cursor-pointer z-40'
                                             aria-hidden='true'
                                         />
                                     </button>
@@ -440,6 +433,7 @@ export default function SidebarShell({ children, ...props }) {
                             setOpen={setSlideOutOpen}
                             settings={props.settings}
                             setSettings={props.setSettings}
+                            title='Advanced Settings'
                         >
                             <AdvancedOptions settings={props.settings} setSettings={props.setSettings} />
                         </SlideOut>

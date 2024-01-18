@@ -3,7 +3,7 @@ import React from 'react';
 export default function AdvancedOptions({ settings, setSettings }) {
     return (
         <div className='bg-gray-100 p-4 rounded-lg shadow'>
-            <h2 className='text-xl font-semibold mb-4'>Advanced Settings</h2>
+            {/* <h2 className='text-xl font-semibold mb-4'>Advanced Settings</h2> */}
 
             <div className='grid grid-cols-1 md:grid-cols-1 gap-8'>
                 <ModelSelect model={settings?.model} setSettings={setSettings} models={settings?.models} />
@@ -70,10 +70,10 @@ function ModelSelect({ model, setSettings, models }) {
                     setSettings((prev) => ({ ...prev, model: e.target.value }));
                     console.log(e.target.value);
                 }}
-                className='mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500'
+                className='mt-1 block w-full -3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-yellow-500 focus:border-yellow-500'
             >
                 {models.map((model) => (
-                    <option key={model.modelId} value={model.modelId}>
+                    <option key={model.modelId} value={model.modelId} className='rounded-none'>
                         {model.name}
                     </option>
                 ))}
