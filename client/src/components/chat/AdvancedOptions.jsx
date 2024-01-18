@@ -12,7 +12,7 @@ export default function AdvancedOptions({ settings, setSettings }) {
                     label='Temperature'
                     value={settings?.temperature}
                     min={0}
-                    max={1}
+                    max={2}
                     step={0.01}
                     updateSettings={setSettings}
                 />
@@ -21,7 +21,7 @@ export default function AdvancedOptions({ settings, setSettings }) {
                     label='Maximum Length'
                     value={settings?.maxLength}
                     min={1}
-                    max={100}
+                    max={4096}
                     step={1}
                     updateSettings={setSettings}
                 />
@@ -83,6 +83,7 @@ function ModelSelect({ model, setSettings, models }) {
 }
 
 function SliderControl({ id, label, value, min, max, step, updateSettings }) {
+    console.log(value);
     return (
         <div>
             <div className='flex justify-between'>

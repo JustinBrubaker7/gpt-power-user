@@ -29,10 +29,14 @@ const Main = () => {
     const [selectedModel, setSelectedModel] = useState('gpt-3.5-turbo-1106');
     const [settings, setSettings] = useState({
         model: selectedModel,
-        temperature: 0.7, // Hardcoded temperature
+        temperature: 1, // Hardcoded temperature
         conversationType: messages.length ? 'continue' : 'new',
         userId: currentUser.userId,
         models: models,
+        maxLength: 4096,
+        topP: 1,
+        frequencyPenalty: 0,
+        presencePenalty: 0,
     });
 
     useEffect(() => {
