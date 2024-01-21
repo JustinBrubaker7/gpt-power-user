@@ -501,7 +501,7 @@ export default function SidebarShell({ children, ...props }) {
                             </div>
                         </div>
 
-                        <main className=''>
+                        <main className='relative'>
                             <SlideOut
                                 open={slideOutOpen}
                                 setOpen={setSlideOutOpen}
@@ -513,19 +513,22 @@ export default function SidebarShell({ children, ...props }) {
                                 <SaveShortcut />
                             </SlideOut>
                             {searchResults.length > 0 && (
-                                <div className='bg-white z-50'>
-                                    <ul>
+                                <div className='absolute bg-white z-50 w-1/2'>
+                                    <ul className='  '>
                                         {searchResults.map((chat) => (
-                                            <li key={chat.id}>
-                                                <Link
+                                            <Link to={`/chat/${chat.id}`}>
+                                                <li
                                                     onClick={() => {
                                                         setSearchText('');
+                                                        setSearchResults([]);
+                                                        document.getElementById('search-field').value = '';
                                                     }}
-                                                    to={`/chat/${chat.id}`}
+                                                    key={chat.id}
+                                                    className='p-2 hover:bg-gray-100 cursor-pointer border-b'
                                                 >
                                                     {chat.title}
-                                                </Link>
-                                            </li>
+                                                </li>
+                                            </Link>
                                         ))}
                                     </ul>
                                 </div>
