@@ -49,3 +49,28 @@ export const createShortCut = async (user, shortcut) => {
         throw new Error('Failed to create shortcut');
     }
 };
+
+export const deleteShortCut = async (user, shortcutId) => {
+    try {
+        const response = await fetch(`${HTTP_URL}/shortcut/deleteshortcut`, {
+            method: 'DELETE',
+            headers: {
+                authorization: `${user.token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ shortcutId: shortcutId }),
+        });
+
+        if (!response.ok) {
+            return {
+                error: 'Failed to delete shortcut',
+            };
+        }
+
+        const newShortcut = await response.json();
+        return newShortcut;
+    } catch (error) {
+        console.error(error);
+        throw new Error('Failed to delete shortcut');
+    }
+};

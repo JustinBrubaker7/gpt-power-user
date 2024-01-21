@@ -7,9 +7,17 @@ import { Link } from 'react-router-dom';
 import AdvancedOptions from '../components/chat/AdvancedOptions.jsx';
 import SlideOut from './SlideOut.jsx';
 import pinSVG from '../assets/pin.svg';
-import { Bars3Icon, AdjustmentsVerticalIcon, Cog6ToothIcon, XMarkIcon, Cog8ToothIcon } from '@heroicons/react/24/outline';
+import {
+    Bars3Icon,
+    AdjustmentsVerticalIcon,
+    Cog6ToothIcon,
+    XMarkIcon,
+    Cog8ToothIcon,
+    EllipsisHorizontalIcon,
+    EllipsisHorizontalCircleIcon,
+} from '@heroicons/react/24/outline';
 import { ChevronDownIcon, MagnifyingGlassIcon, PlusIcon } from '@heroicons/react/20/solid';
-import SaveSnippets from '../components/chat/SaveSnippets.jsx';
+import SaveShortcut from '../components/chat/SaveShortcut.jsx';
 
 const userNavigation = [
     { name: 'Your profile', href: '#' },
@@ -23,10 +31,12 @@ function classNames(...classes) {
 export default function SidebarShell({ children, ...props }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [slideOutOpen, setSlideOutOpen] = useState(false);
+    const [sidebarWidth, setSidebarWidth] = useState(330);
     const { currentUser, logout } = useAuth();
     const [navigation, setNavigation] = useState();
     const [loading, setLoading] = useState(true);
     const [pinnedChats, setPinnedChats] = useState([]);
+    const [showEllipsisTooltip, setShowEllipsisTooltip] = useState(false);
 
     useEffect(() => {
         getAllChats(currentUser).then((res) => {
@@ -45,7 +55,9 @@ export default function SidebarShell({ children, ...props }) {
                     pinned: chat.pinned,
                 })),
             ];
-            setNavigation(updatedNavigation);
+            // filter out pinned chats
+            const filteredNavigation = updatedNavigation.filter((chat) => !chat.pinned);
+            setNavigation(filteredNavigation);
             const pinnedChatsArray = res.chats.filter((chat) => chat.pinned);
             const updatedPinnedChats = pinnedChatsArray.map((chat) => ({
                 name: chat.title || 'New Chat', // Fallback to 'Chat' if title is not available
@@ -75,12 +87,36 @@ export default function SidebarShell({ children, ...props }) {
             // Remove from pinned chats
             updatedPinnedChats = pinnedChats.filter((chatItem) => chatItem.id !== item.id);
             // Add back to main navigation
-            updatedNavigation = [...navigation, item];
+            updatedNavigation = [item, ...navigation];
         }
 
         setPinnedChats(updatedPinnedChats);
         setNavigation(updatedNavigation);
         pinChatById(item.id, currentUser, item.pinned); // Added item.pinned to indicate the pinning status
+    };
+
+    const handleResize = (e) => {
+        const newWidth = Math.max(e.clientX, 150); // Set a minimum width to prevent the sidebar from getting too small
+        // set a min and max width
+        if (newWidth > 300 && newWidth < 450) {
+            setSidebarWidth(newWidth);
+        }
+    };
+
+    // Add mouse down and up event handlers
+    const handleMouseDown = (e) => {
+        e.preventDefault();
+        document.addEventListener('mousemove', handleResize);
+        document.addEventListener('mouseup', handleMouseUp);
+    };
+
+    const handleMouseUp = () => {
+        document.removeEventListener('mousemove', handleResize);
+        document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    const handleOpenEllipseToolTop = (item) => {
+        setShowEllipsisTooltip(!showEllipsisTooltip);
     };
 
     return (
@@ -132,7 +168,7 @@ export default function SidebarShell({ children, ...props }) {
                                         </div>
                                     </Transition.Child>
                                     {/* Sidebar component, swap this element with another sidebar if you like */}
-                                    <div className='flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-4'>
+                                    <div className='flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-4 '>
                                         <div className='flex h-16 shrink-0 items-center'>
                                             <img className='h-8 w-auto' src={BlackLogo} alt='Your Company' />
                                             <h1 className='text-black'>PowerGPT</h1>
@@ -193,8 +229,25 @@ export default function SidebarShell({ children, ...props }) {
                 </Transition.Root>
 
                 {/* Static sidebar for desktop */}
-                <div className='hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col '>
+                <div
+                    className='hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:flex-col'
+                    style={{ width: `${sidebarWidth}px` }}
+                >
+                    {/* Resizable handle */}
                     {/* Sidebar component, swap this element with another sidebar if you like */}
+                    <div
+                        onMouseDown={handleMouseDown}
+                        style={{
+                            width: '5px',
+                            cursor: 'ew-resize',
+                            position: 'absolute',
+                            top: 0,
+                            right: 0,
+                            bottom: 0,
+                            zIndex: 100,
+                            // You might want to add more styles here
+                        }}
+                    />
                     <div className='flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6 pb-4'>
                         <div className='flex h-16 shrink-0 items-center'>
                             <img className='h-12 w-auto' src={BlackLogo} alt='Your Company' />
@@ -277,22 +330,24 @@ export default function SidebarShell({ children, ...props }) {
                                                                 />
                                                             )}
                                                             {item.name
-                                                                ? item.name.length > 30
-                                                                    ? item.name.slice(0, 30) + '...'
+                                                                ? item.name.length > 32
+                                                                    ? item.name.slice(0, 32) + '...'
                                                                     : item.name
                                                                 : 'New Chat'}
                                                         </Link>
                                                         {!item.pinned && (
-                                                            // <EllipsisHorizontalIcon
-                                                            //     onClick={() => handlePinItem(item)}
-                                                            //     className='h-6 w-6 shrink-0 text-gray-400 hover:text-yellow-500 cursor-pointer'
-                                                            // />
-                                                            <img
-                                                                src={pinSVG}
-                                                                alt='pin'
-                                                                onClick={() => handlePinItem(item)}
-                                                                className='h-5 w-5 shrink-0 text-gray-400 hover:text-yellow-500 cursor-pointer opacity-30 hover:opacity-80'
-                                                            />
+                                                            <>
+                                                                <img
+                                                                    src={pinSVG}
+                                                                    alt='pin'
+                                                                    onClick={() => handlePinItem(item)}
+                                                                    className='h-5 w-5 shrink-0 text-gray-400 hover:text-yellow-500 cursor-pointer opacity-30 hover:opacity-80'
+                                                                />
+                                                                <EllipsisHorizontalIcon
+                                                                    onClick={() => handleOpenEllipseToolTop(item)}
+                                                                    className='h-6 w-6 shrink-0 text-gray-400 hover:text-yellow-500 cursor-pointer'
+                                                                />
+                                                            </>
                                                         )}
                                                     </div>
                                                     <hr />
@@ -317,125 +372,129 @@ export default function SidebarShell({ children, ...props }) {
                         </nav>
                     </div>
                 </div>
+                <div className='lg:pl-0' style={{ paddingLeft: `${sidebarWidth - 290}px` }}>
+                    <div className='lg:pl-72 '>
+                        <div className='sticky top-0 z-40 lg:mx-auto '>
+                            <div className='flex h-16 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-0 lg:shadow-none'>
+                                <button
+                                    type='button'
+                                    className='-m-2.5 p-2.5 text-gray-700 lg:hidden'
+                                    onClick={() => setSidebarOpen(true)}
+                                >
+                                    <span className='sr-only'>Open sidebar</span>
+                                    <Bars3Icon className='h-6 w-6' aria-hidden='true' />
+                                </button>
 
-                <div className='lg:pl-72 '>
-                    <div className='sticky top-0 z-40 lg:mx-auto '>
-                        <div className='flex h-16 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-0 lg:shadow-none'>
-                            <button
-                                type='button'
-                                className='-m-2.5 p-2.5 text-gray-700 lg:hidden'
-                                onClick={() => setSidebarOpen(true)}
-                            >
-                                <span className='sr-only'>Open sidebar</span>
-                                <Bars3Icon className='h-6 w-6' aria-hidden='true' />
-                            </button>
+                                {/* Separator */}
+                                <div className='h-6 w-px bg-gray-200 lg:hidden' aria-hidden='true' />
 
-                            {/* Separator */}
-                            <div className='h-6 w-px bg-gray-200 lg:hidden' aria-hidden='true' />
-
-                            <div className='flex flex-1 gap-x-4 self-stretch lg:gap-x-6 px-4'>
-                                <form className='relative flex flex-1' action='#' method='GET'>
-                                    <label htmlFor='search-field' className='sr-only'>
-                                        Search
-                                    </label>
-                                    <MagnifyingGlassIcon
-                                        className='pointer-events-none absolute inset-y-0 left-0 h-full w-5 text-gray-400'
-                                        aria-hidden='true'
-                                    />
-                                    <input
-                                        id='search-field'
-                                        className='block h-full w-full border-0 py-0 pl-8 pr-0 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm'
-                                        placeholder='Search...'
-                                        type='text'
-                                        name='text'
-                                    />
-                                </form>
-                                <div className='flex items-center gap-x-4 lg:gap-x-6'>
-                                    <button type='button' className='-m-2.5 p-2.5 text-gray-400 hover:text-gray-500'>
-                                        <span className='sr-only'>View notifications</span>
-                                        <AdjustmentsVerticalIcon
-                                            onClick={() => {
-                                                setSlideOutOpen(!slideOutOpen);
-                                            }}
-                                            className='h-7 w-7 cursor-pointer z-40'
+                                <div className='flex flex-1 gap-x-4 self-stretch lg:gap-x-6 px-4'>
+                                    <form className='relative flex flex-1' action='#' method='GET'>
+                                        <label htmlFor='search-field' className='sr-only'>
+                                            Search
+                                        </label>
+                                        <MagnifyingGlassIcon
+                                            className='pointer-events-none absolute inset-y-0 left-0 h-full w-5 text-gray-400'
                                             aria-hidden='true'
                                         />
-                                    </button>
+                                        <input
+                                            id='search-field'
+                                            className='block h-full w-full border-0 py-0 pl-8 pr-0 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm'
+                                            placeholder='Search...'
+                                            type='text'
+                                            name='text'
+                                        />
+                                    </form>
+                                    <div className='flex items-center gap-x-4 lg:gap-x-6'>
+                                        <button type='button' className='-m-2.5 p-2.5 text-gray-400 hover:text-gray-500'>
+                                            <span className='sr-only'>View notifications</span>
+                                            <AdjustmentsVerticalIcon
+                                                onClick={() => {
+                                                    setSlideOutOpen(!slideOutOpen);
+                                                }}
+                                                className='h-7 w-7 cursor-pointer z-40'
+                                                aria-hidden='true'
+                                            />
+                                        </button>
 
-                                    {/* Separator */}
-                                    <div className='hidden lg:block lg:h-6 lg:w-px lg:bg-gray-200' aria-hidden='true' />
+                                        {/* Separator */}
+                                        <div className='hidden lg:block lg:h-6 lg:w-px lg:bg-gray-200' aria-hidden='true' />
 
-                                    {/* Profile dropdown */}
-                                    <Menu as='div' className='relative'>
-                                        <Menu.Button className='-m-1.5 flex items-center p-1.5'>
-                                            <span className='sr-only'>Open user menu</span>
-                                            {/* <img
+                                        {/* Profile dropdown */}
+                                        <Menu as='div' className='relative'>
+                                            <Menu.Button className='-m-1.5 flex items-center p-1.5'>
+                                                <span className='sr-only'>Open user menu</span>
+                                                {/* <img
                                                 className='h-8 w-8 rounded-full bg-gray-50'
                                                 src='https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
                                                 alt=''
                                             /> */}
-                                            <span className='hidden lg:flex lg:items-center'>
-                                                <span
-                                                    className='-ml-1 text-sm font-semibold leading-6 text-gray-900'
-                                                    aria-hidden='true'
-                                                >
-                                                    {currentUser?.username}
+                                                <span className='hidden lg:flex lg:items-center'>
+                                                    <span
+                                                        className='-ml-1 text-sm font-semibold leading-6 text-gray-900'
+                                                        aria-hidden='true'
+                                                    >
+                                                        {currentUser?.username}
+                                                    </span>
+                                                    <ChevronDownIcon
+                                                        className='ml-2 h-5 w-5 text-gray-400'
+                                                        aria-hidden='true'
+                                                    />
                                                 </span>
-                                                <ChevronDownIcon className='ml-2 h-5 w-5 text-gray-400' aria-hidden='true' />
-                                            </span>
-                                            <Cog8ToothIcon
-                                                className='ml-2 h-6 w-6 text-gray-400 md:hidden'
-                                                aria-hidden='true'
-                                            />
-                                        </Menu.Button>
-                                        <Transition
-                                            as={Fragment}
-                                            enter='transition ease-out duration-100'
-                                            enterFrom='transform opacity-0 scale-95'
-                                            enterTo='transform opacity-100 scale-100'
-                                            leave='transition ease-in duration-75'
-                                            leaveFrom='transform opacity-100 scale-100'
-                                            leaveTo='transform opacity-0 scale-95'
-                                        >
-                                            <Menu.Items className='absolute right-0 z-10 mt-2.5 w-32 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 focus:outline-none'>
-                                                {userNavigation.map((item) => (
-                                                    <Menu.Item key={item.name}>
-                                                        {({ active }) => (
-                                                            <div
-                                                                onClick={() => {
-                                                                    if (item.name === 'Sign out') logout();
-                                                                }}
-                                                                className={classNames(
-                                                                    active ? 'bg-gray-50' : '',
-                                                                    'block px-3 py-1 text-sm leading-6 text-gray-900 cursor-pointer'
-                                                                )}
-                                                            >
-                                                                {item.name}
-                                                            </div>
-                                                        )}
-                                                    </Menu.Item>
-                                                ))}
-                                            </Menu.Items>
-                                        </Transition>
-                                    </Menu>
+                                                <Cog8ToothIcon
+                                                    className='ml-2 h-6 w-6 text-gray-400 md:hidden'
+                                                    aria-hidden='true'
+                                                />
+                                            </Menu.Button>
+                                            <Transition
+                                                as={Fragment}
+                                                enter='transition ease-out duration-100'
+                                                enterFrom='transform opacity-0 scale-95'
+                                                enterTo='transform opacity-100 scale-100'
+                                                leave='transition ease-in duration-75'
+                                                leaveFrom='transform opacity-100 scale-100'
+                                                leaveTo='transform opacity-0 scale-95'
+                                            >
+                                                <Menu.Items className='absolute right-0 z-10 mt-2.5 w-32 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 focus:outline-none'>
+                                                    {userNavigation.map((item) => (
+                                                        <Menu.Item key={item.name}>
+                                                            {({ active }) => (
+                                                                <div
+                                                                    onClick={() => {
+                                                                        if (item.name === 'Sign out') logout();
+                                                                    }}
+                                                                    className={classNames(
+                                                                        active ? 'bg-gray-50' : '',
+                                                                        'block px-3 py-1 text-sm leading-6 text-gray-900 cursor-pointer'
+                                                                    )}
+                                                                >
+                                                                    {item.name}
+                                                                </div>
+                                                            )}
+                                                        </Menu.Item>
+                                                    ))}
+                                                </Menu.Items>
+                                            </Transition>
+                                        </Menu>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <main className=''>
-                        <SlideOut
-                            open={slideOutOpen}
-                            setOpen={setSlideOutOpen}
-                            settings={props.settings}
-                            setSettings={props.setSettings}
-                            title='Advanced Settings'
-                        >
-                            <AdvancedOptions settings={props.settings} setSettings={props.setSettings} />
-                            <SaveSnippets />
-                        </SlideOut>
-                        <div className='px-4 py-2'>{children}</div>
-                    </main>
+                        <main className=''>
+                            <SlideOut
+                                open={slideOutOpen}
+                                setOpen={setSlideOutOpen}
+                                settings={props.settings}
+                                setSettings={props.setSettings}
+                                title='Advanced Settings'
+                            >
+                                <AdvancedOptions settings={props.settings} setSettings={props.setSettings} />
+                                <SaveShortcut />
+                            </SlideOut>
+                            <div className='px-4 py-2'>{children}</div>
+                        </main>
+                    </div>
                 </div>
             </div>
         </>

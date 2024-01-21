@@ -3,8 +3,9 @@ import SidebarShell from '../../layout/SidebarShell.jsx';
 import { useAuth } from '../../context/auth-context.jsx';
 import { useLocation } from 'react-router-dom';
 import { establishWebSocketConnection, fetchChatById } from '../../api/chat.js';
-import { getAllShortCuts } from '../../api/shortcut.js';
+import { getAllShortCuts, deleteShortCut } from '../../api/shortcut.js';
 import CodeBlock from './code-block/CodeBlock.jsx';
+import { TrashIcon } from '@heroicons/react/24/outline';
 
 const models = [
     {
@@ -47,7 +48,6 @@ const Main = () => {
         setSelectedModel(settings.model);
     }, [settings.model]);
 
-    console.log('settings', settings);
     const [shortcuts, setShortcuts] = useState([]);
 
     const location = useLocation();
@@ -56,7 +56,6 @@ const Main = () => {
         if (currentUser) {
             getAllShortCuts(currentUser).then((shortcuts) => {
                 setShortcuts(shortcuts);
-                console.log('shortcuts', shortcuts);
             });
         }
     }, []);
@@ -157,6 +156,8 @@ const Main = () => {
                     handleSendMessage={handleSendMessage}
                     handleKeyDown={handleKeyDown}
                     shortcuts={shortcuts}
+                    setShortcuts={setShortcuts}
+                    currentUser={currentUser}
                 />
             </div>
         </SidebarShell>
@@ -214,7 +215,15 @@ const MessageList = React.memo(({ messages, endOfMessagesRef, modelName }) => {
     );
 });
 
-const MessageInput = ({ newMessage, setNewMessage, handleSendMessage, handleKeyDown, shortcuts }) => {
+const MessageInput = ({
+    newMessage,
+    setNewMessage,
+    handleSendMessage,
+    handleKeyDown,
+    shortcuts,
+    setShortcuts,
+    currentUser,
+}) => {
     const [rows, setRows] = useState(1);
     const [showShortcuts, setShowShortcuts] = useState(false);
     const [filterText, setFilterText] = useState('');
@@ -275,6 +284,14 @@ const MessageInput = ({ newMessage, setNewMessage, handleSendMessage, handleKeyD
             shortcut.name.toLowerCase().includes(filterText.toLowerCase())
         );
 
+        const handleDeleteShortcut = (shortcutId) => {
+            deleteShortCut(currentUser, shortcutId).then(() => {
+                getAllShortCuts(currentUser).then((shortcuts) => {
+                    setShortcuts(shortcuts);
+                });
+            });
+        };
+
         return (
             <div className='absolute bg-white border p-2 bottom-11'>
                 <ul>
@@ -282,8 +299,11 @@ const MessageInput = ({ newMessage, setNewMessage, handleSendMessage, handleKeyD
                         <ShortCutRow
                             key={shortcut.id}
                             shortcut={'/' + shortcut.name}
+                            shortcutId={shortcut.id}
                             text={shortcut.text}
                             isFocused={index === focusedShortcutIndex}
+                            currentUser={currentUser}
+                            handleDeleteShortcut={handleDeleteShortcut}
                         />
                     ))}
                 </ul>
@@ -291,7 +311,7 @@ const MessageInput = ({ newMessage, setNewMessage, handleSendMessage, handleKeyD
         );
     };
 
-    const ShortCutRow = ({ shortcut, text, isFocused }) => {
+    const ShortCutRow = ({ shortcut, text, isFocused, handleDeleteShortcut, shortcutId }) => {
         return (
             <div
                 className={`flex items-center border-b p-2 ${
@@ -302,6 +322,15 @@ const MessageInput = ({ newMessage, setNewMessage, handleSendMessage, handleKeyD
                 <span className='text-gray-500 text-sm'>{shortcut}</span>
                 <span className='text-gray-500 text-sm ml-2'>-</span>
                 <span className='text-gray-500 text-sm ml-2'>{text.length > 75 ? `${text.slice(0, 75)}...` : text}</span>
+                <span className='text-gray-500 text-sm ml-auto'>
+                    <TrashIcon
+                        className='h-4 w-4 text-gray-500 hover:text-red-500'
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteShortcut(shortcutId);
+                        }}
+                    />
+                </span>
             </div>
         );
     };
@@ -310,7 +339,7 @@ const MessageInput = ({ newMessage, setNewMessage, handleSendMessage, handleKeyD
         <div className='relative flex items-end w-full md:w-4/5 mx-auto'>
             <textarea
                 type='text'
-                placeholder='Type your message... or use / to insert a shortcut'
+                placeholder='Type your message... or use / to access your shortcuts'
                 value={newMessage}
                 onChange={handleChange}
                 onKeyDown={(e) => {

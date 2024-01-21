@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { createShortCut } from '../../api/shortcut';
 import { useAuth } from '../../context/auth-context';
 
-export default function SaveSnippets() {
+export default function SaveShortcut() {
     const { currentUser } = useAuth();
     const [title, setTitle] = useState('');
     const [snippet, setSnippet] = useState('');
@@ -26,7 +26,7 @@ export default function SaveSnippets() {
 
     return (
         <div className='bg-gray-100 p-4 rounded-lg shadow mt-4'>
-            <h2 className='text-md font-normal mb-4'>Add a Snippet</h2>
+            <h2 className='text-md font-normal mb-4'>Add a shortcut</h2>
             <form onSubmit={handleSave}>
                 <input
                     type='text'
@@ -44,11 +44,11 @@ export default function SaveSnippets() {
                     id='snippet'
                     value={snippet}
                     onChange={(e) => setSnippet(e.target.value)}
-                    placeholder='Enter snippet'
+                    placeholder='Enter shortcut text here...'
                     className='block w-full rounded-sm border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-yellow-600 sm:text-sm sm:leading-6 hover:bg-gray-50'
                 />
                 <p className='text-xs text-gray-500 mt-1'>
-                    Add a new snippet for faster prompting. To use the snippet enter a "/" in the prompt box.
+                    Add a new shortcut for faster prompting. To use the shortcut enter a "/" in the prompt box.
                 </p>
                 <div className='flex justify-end mt-4'>
                     <button
