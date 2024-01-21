@@ -24,10 +24,12 @@ console.log(process.env.JWT_SECRET);
 const authRoutes = require('./routes/auth');
 const chatRoutes = require('./routes/chat');
 const shortcutRoutes = require('./routes/shortcut');
+const searchRoutes = require('./routes/search');
 
 app.use('/auth', authRoutes);
 app.use('/chat', verifyToken, chatRoutes);
 app.use('/shortcut', verifyToken, shortcutRoutes);
+app.use('/search', verifyToken, searchRoutes);
 
 // route that says hello
 app.get('/', (req, res) => {

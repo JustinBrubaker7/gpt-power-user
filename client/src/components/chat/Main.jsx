@@ -289,7 +289,7 @@ const MessageInput = ({
                 <div className='absolute bg-white border p-2 bottom-11'>
                     <ul>
                         <li onClick={() => setShowShortcuts(true)} className='text-gray-500 text-sm '>
-                            No shortcuts found. Open sidebar to add a shortcut
+                            No shortcuts found. Open advanced settings to add a shortcut
                         </li>
                     </ul>
                 </div>

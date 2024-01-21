@@ -18,6 +18,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { ChevronDownIcon, MagnifyingGlassIcon, PlusIcon } from '@heroicons/react/20/solid';
 import SaveShortcut from '../components/chat/SaveShortcut.jsx';
+import { searchManyChats } from '../api/search.js';
 
 const userNavigation = [
     { name: 'Your profile', href: '#' },
@@ -37,6 +38,23 @@ export default function SidebarShell({ children, ...props }) {
     const [loading, setLoading] = useState(true);
     const [pinnedChats, setPinnedChats] = useState([]);
     const [showEllipsisTooltip, setShowEllipsisTooltip] = useState(false);
+    const [searchText, setSearchText] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+
+    useEffect(() => {
+        if (searchText.length > 1) {
+            searchManyChats(currentUser, searchText).then((res) => {
+                if (res.error) {
+                    logout();
+                    return;
+                }
+                setSearchResults(res.chats);
+                console.log(res.chats);
+            });
+        } else {
+            setSearchResults([]);
+        }
+    }, [searchText]);
 
     useEffect(() => {
         getAllChats(currentUser).then((res) => {
@@ -237,6 +255,7 @@ export default function SidebarShell({ children, ...props }) {
                     {/* Sidebar component, swap this element with another sidebar if you like */}
                     <div
                         onMouseDown={handleMouseDown}
+                        className='hidden lg:block '
                         style={{
                             width: '5px',
                             cursor: 'ew-resize',
@@ -372,7 +391,7 @@ export default function SidebarShell({ children, ...props }) {
                         </nav>
                     </div>
                 </div>
-                <div className='lg:pl-0' style={{ paddingLeft: `${sidebarWidth - 290}px` }}>
+                <div className='lg:pl-0 ' style={{ paddingLeft: `${sidebarWidth - 290}px` }}>
                     <div className='lg:pl-72 '>
                         <div className='sticky top-0 z-40 lg:mx-auto '>
                             <div className='flex h-16 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-0 lg:shadow-none'>
@@ -403,6 +422,7 @@ export default function SidebarShell({ children, ...props }) {
                                             placeholder='Search...'
                                             type='text'
                                             name='text'
+                                            onChange={(e) => setSearchText(e.target.value)}
                                         />
                                     </form>
                                     <div className='flex items-center gap-x-4 lg:gap-x-6'>
@@ -492,6 +512,24 @@ export default function SidebarShell({ children, ...props }) {
                                 <AdvancedOptions settings={props.settings} setSettings={props.setSettings} />
                                 <SaveShortcut />
                             </SlideOut>
+                            {searchResults.length > 0 && (
+                                <div className='bg-white z-50'>
+                                    <ul>
+                                        {searchResults.map((chat) => (
+                                            <li key={chat.id}>
+                                                <Link
+                                                    onClick={() => {
+                                                        setSearchText('');
+                                                    }}
+                                                    to={`/chat/${chat.id}`}
+                                                >
+                                                    {chat.title}
+                                                </Link>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
                             <div className='px-4 py-2'>{children}</div>
                         </main>
                     </div>
