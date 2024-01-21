@@ -284,6 +284,18 @@ const MessageInput = ({
             shortcut.name.toLowerCase().includes(filterText.toLowerCase())
         );
 
+        if (!filteredShortcuts.length) {
+            return (
+                <div className='absolute bg-white border p-2 bottom-11'>
+                    <ul>
+                        <li onClick={() => setShowShortcuts(true)} className='text-gray-500 text-sm '>
+                            No shortcuts found. Open sidebar to add a shortcut
+                        </li>
+                    </ul>
+                </div>
+            );
+        }
+
         const handleDeleteShortcut = (shortcutId) => {
             deleteShortCut(currentUser, shortcutId).then(() => {
                 getAllShortCuts(currentUser).then((shortcuts) => {
