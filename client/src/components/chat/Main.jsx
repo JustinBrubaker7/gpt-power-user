@@ -19,7 +19,7 @@ const models = [
 ];
 
 const Main = () => {
-    const { currentUser } = useAuth();
+    const { currentUser, logout } = useAuth();
 
     const ws = useRef(null);
     const endOfMessagesRef = useRef(null);
@@ -66,6 +66,10 @@ const Main = () => {
 
         if (chatIdFromUrl) {
             fetchChatById(chatIdFromUrl, currentUser).then((chat) => {
+                if (chat.error) {
+                    logout();
+                    return;
+                }
                 setChatId(chatIdFromUrl);
                 setMessages(JSON.parse(chat.messages));
                 setSelectedModel(chat.model);
@@ -101,7 +105,7 @@ const Main = () => {
         const payload = {
             settings: {
                 model: selectedModel,
-                temperature: 0.7, // Hardcoded temperature
+                ...settings,
                 conversationType: messages.length ? 'continue' : 'new',
                 userId: currentUser.userId,
                 id: settings.id,

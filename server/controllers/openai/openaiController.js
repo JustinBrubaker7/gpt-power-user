@@ -20,6 +20,10 @@ async function completeChatStream({ ws, message, WebSocket }) {
         messages: data.messages,
         stream: true,
         temperature: data.settings.temperature,
+        frequency_penalty: data.settings.frequencyPenalty,
+        top_p: data.settings.topP,
+        presence_penalty: data.settings.presencePenalty,
+        max_tokens: data.settings.maxLength,
     });
 
     for await (const chunk of stream) {

@@ -114,7 +114,9 @@ export const getAllChats = async (user) => {
         return chats;
     } catch (error) {
         console.error(error);
-        throw new Error('Failed to fetch chats');
+        return {
+            error: 'Failed to fetch chats',
+        };
     }
 };
 
@@ -136,7 +138,9 @@ export const fetchChatById = async (chatId, user) => {
         return chat.chat;
     } catch (error) {
         console.error(error);
-        throw new Error('Failed to fetch chat');
+        return {
+            error: 'Failed to fetch chat',
+        };
     }
 };
 

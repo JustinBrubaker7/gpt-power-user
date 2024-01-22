@@ -42,7 +42,7 @@ export default function SidebarShell({ children, ...props }) {
     const [searchResults, setSearchResults] = useState([]);
 
     useEffect(() => {
-        if (searchText.length > 1) {
+        if (searchText.length > 0) {
             searchManyChats(currentUser, searchText).then((res) => {
                 if (res.error) {
                     logout();
