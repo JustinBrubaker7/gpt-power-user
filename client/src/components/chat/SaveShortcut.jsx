@@ -18,6 +18,7 @@ export default function SaveShortcut() {
             // Reset form or show success message
             setTitle('');
             setSnippet('');
+            window.location.reload();
         } catch (error) {
             // Handle error
             console.error('Error saving snippet:', error);
@@ -55,7 +56,7 @@ export default function SaveShortcut() {
                         type='submit'
                         className='px-3 py-2 text-white bg-blue-700 rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600'
                     >
-                        Save
+                        Save Shortcut
                     </button>
                 </div>
             </form>

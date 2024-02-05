@@ -101,7 +101,7 @@ function SliderControl({ id, label, value, min, max, step, updateSettings }) {
                 min={min}
                 max={max}
                 step={step}
-                onChange={(e) => updateSettings((prev) => ({ ...prev, [id]: e.target.value }))}
+                onChange={(e) => updateSettings((prev) => ({ ...prev, [id]: Number(e.target.value) }))}
                 className='mt-1 block w-full h-2 bg-gray-300 rounded-md cursor-pointer appearance-none focus:outline-none focus:ring-0'
                 style={{
                     backgroundSize: `${((value - min) / (max - min)) * 100}% 100%`,
