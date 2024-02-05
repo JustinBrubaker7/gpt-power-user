@@ -259,7 +259,7 @@ const MessageInput = ({
         setNewMessage(value);
         updateRows(value);
 
-        if (value.includes('/')) {
+        if (value.endsWith('/')) {
             const parts = value.split('/');
             const lastPart = parts[parts.length - 1];
             setShowShortcuts(true);
