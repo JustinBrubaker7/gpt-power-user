@@ -6,6 +6,7 @@ import { establishWebSocketConnection, fetchChatById } from '../../api/chat.js';
 import { getAllShortCuts, deleteShortCut } from '../../api/shortcut.js';
 import CodeBlock from './code-block/CodeBlock.jsx';
 import { TrashIcon } from '@heroicons/react/24/outline';
+import parse from 'html-react-parser';
 
 const models = [
     {
@@ -396,15 +397,33 @@ const formatMessage = (message) => {
 
     message.split(codeBlockRegex).forEach((part, index) => {
         if (index % 2 === 0) {
-            // Regular text
+            // Enhanced regular text processing to handle markdown formatting
             formattedMessage.push(
                 <React.Fragment key={index}>
-                    {part.split('\n').map((line, lineIndex) => (
-                        <React.Fragment key={lineIndex}>
-                            {line}
-                            <br />
-                        </React.Fragment>
-                    ))}
+                    {part.split('\n').map((line, lineIndex) => {
+                        // Check for bold text and replace it with <b> tags
+                        let boldFormatted = line.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+                        // Check for titles and replace them with appropriate heading tags
+                        let titleFormatted = boldFormatted.replace(/^###\s?(.*)/g, '<h3>$1</h3>');
+
+                        let italicFormatted = titleFormatted.replace(/\*(.*?)\*/g, '<i>$1</i>');
+
+                        let linkFormatted = italicFormatted.replace(
+                            /\[(.*?)\]\((.*?)\)/g,
+                            '<a href="$2" target="_blank">$1</a>'
+                        );
+
+                        // Parse the resulting string to convert it into JSX elements
+                        // This uses a simple approach and may need to be enhanced for complex scenarios
+                        const formattedLine = parseFormattedText(linkFormatted);
+
+                        return (
+                            <React.Fragment key={lineIndex}>
+                                {formattedLine}
+                                <br />
+                            </React.Fragment>
+                        );
+                    })}
                 </React.Fragment>
             );
         } else {
@@ -416,6 +435,11 @@ const formatMessage = (message) => {
     });
 
     return <>{formattedMessage}</>;
+};
+
+const parseFormattedText = (text) => {
+    // Convert HTML string into React elements using html-react-parser
+    return parse(text, {});
 };
 
 export default Main;
