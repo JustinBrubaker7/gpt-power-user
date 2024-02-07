@@ -22,9 +22,10 @@ To install the project, follow these steps:
 3. cd into the client directory: `cd client`
 4. Install dependencies: `npm install`
 5. Start the client: `npm run dev`
-6. cd into the server directory: `cd ../server`
-7. Install dependencies: `npm install`
-8. Start the server: `npm run start`
+6. Open a new terminal window
+7. cd into the server directory: `cd ../server`
+8. Install dependencies: `npm install`
+9. Start the server: `npm run start`
 
 ## Usage
 
